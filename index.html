@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.0</div>
+        <div>Version: 1.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -49,6 +49,20 @@
         <div>M/m: Mute/Unmute</div>
     </div>
     <script>
+        // Copyright 2024 by moshix
+        // All rights reserved
+        // Moon Lander
+        // a moon lander game with as possible as realistic physics, taken from Apollo 11
+        // v 0.1 game logic and animation (time based)
+        // v 0.2 load assets and sounds
+        // v 0.5 first autolander version...crap
+        // v 0.6 check AGC  designated landing point logic
+        // v 0.7 attenuate lateral movements and designate landing spot
+        // v 0.8 max lateral thrust and vertical speed control
+        // v 0.9 find best landing spot among crater landscape
+        // v 1.0 landing / crash detection
+        // v 1.1 better and smoother navigation in auto-landing, plume control
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -83,7 +97,6 @@
         let isPaused = false;
 
         // Global variables
-        let autolandStarted = false; // New flag to check if autoland has already started
         const commanderOrbitSpeed = 0.0003;
         const planet1OrbitSpeed = 0.0004;
         const issOrbitSpeed = 0.0005;
@@ -123,7 +136,8 @@
         let nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
 
         function initializeGame() {
-            bestLandingSpot = null;
+            LandingMode = "Manual Mode";
+            bestLandingSpot = false;
             landerY = 50;
             landerX = canvas.width / 2 - 25;
             velocityY = 0;
@@ -291,12 +305,7 @@ function autoland() {
     autolandActivated = true;
     landingMode = 'Autoland Mode';
 
-    // Ensure autoland only starts once
-    if (!autolandStarted) { 
-        autolandStarted = true;
-
         // calculate the largest flat landing area 
-        if (!bestLandingSpot) {
             let largestFlatAreaStart = 0;
             let largestFlatWidth = 0;
             let currentFlatStart = null;
@@ -325,19 +334,30 @@ function autoland() {
 
             bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
             drawLandingCross();
-        }
-    }
+    
 
     // Adjust lateral thrust smoothly toward best landing spot
     const lateralDistance = bestLandingSpot - landerX;
     const lateralSpeedFactor = Math.abs(lateralDistance) / 200; // Reduce thrust scaling
-    const maxLateralThrust = 0.17; // Cap the lateral thrust
+    let maxLateralThrust = 0.17; // Cap the lateral thrust
 
+
+    // best landing spot is far away
     if (Math.abs(lateralDistance) > 32) {
+        let maxLateralThrust = 0.21; // Cap the lateral thrust
         accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
-    } else {
-        accelerationX = 0; // Stop lateral movement when close enough
+     }
+    
+    // best landing spot is not too far
+    if (Math.abs(lateralDistance) < 32) {
+        let maxLateralThrust = 0.17; // Cap the lateral thrust
+        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
     }
+
+    if (Math.abs(lateralDistance) < 3) {
+        accelerationX = 0; // Stop lateral movement when close enough
+     }
+
 
     // **Apply Proportional Vertical Thrust**
     if (landerY < canvas.height - 55) { // Above ground level
@@ -375,6 +395,7 @@ function checkLanding(hasTouchedDown) {
         if (Math.abs(velocityY) > safeVerticalSpeed) {
         isCrashed = true;
         isThrusting = false;
+        bestLandingSpot = false;
         drawLander();
         statusMessage = 'You crashed due to high vertical speed!';
         showLandingStats();
@@ -385,6 +406,7 @@ function checkLanding(hasTouchedDown) {
         if (Math.abs(velocityX) > safeLateralSpeed) {
             isCrashed = true;
             isThrusting = false;
+            bestLandingSpot = false;
             drawLander();
             statusMessage = 'You crashed! Too high lateral speed!';
             showLandingStats();
@@ -395,6 +417,7 @@ function checkLanding(hasTouchedDown) {
         if (!isSafeLanding(landerX, landerWidth)) {
             console.log("Crash due to unsafe landing surface.");
             isCrashed = true;
+            bestLandingSpot = false;
             isThrusting = false;
             drawLander();
             statusMessage = 'You Crashed on a crater!';
@@ -405,6 +428,7 @@ function checkLanding(hasTouchedDown) {
         // If all conditions are met, it's a safe landing
         isCrashed = false;
         isThrusting = false;
+        bestLandingSpot = false;
         statusMessage = 'You Crashed!';
         showLandingStats();
         //landLander(); // Trigger successful landing sequence
@@ -594,4 +618,3 @@ function checkLanding(hasTouchedDown) {
     </script>
 </body>
 </html>
-
