@@ -343,10 +343,20 @@ function autoland() {
 
 
     // best landing spot is far away
-    if (Math.abs(lateralDistance) > 32) {
+    if (Math.abs(lateralDistance) > 50 && landerY > canvas.height + 100) {
+        let maxLateralThrust = 0.24; // Cap the lateral thrust
+        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
+     }
+    if (Math.abs(lateralDistance) > 32 && landerY > canvas.height + 100) {
         let maxLateralThrust = 0.21; // Cap the lateral thrust
         accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
      }
+
+    if (Math.abs(lateralDistance) > 32 && landerY < canvas.height + 100) {
+        let maxLateralThrust = 0.19; // Cap the lateral thrust
+        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
+     }
+
     
     // best landing spot is not too far
     if (Math.abs(lateralDistance) < 32) {
@@ -618,3 +628,4 @@ function checkLanding(hasTouchedDown) {
     </script>
 </body>
 </html>
+
