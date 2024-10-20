@@ -98,6 +98,7 @@
         let isPaused = false;
 
         // Global variables
+        const landerWidth = 50;
         const commanderOrbitSpeed = 0.0003;
         const planet1OrbitSpeed = 0.0004;
         const issOrbitSpeed = 0.0005;
@@ -313,7 +314,7 @@ function autoland() {
             let currentFlatWidth = 0;
 
             for (let x = 0; x < canvas.width; x += 5) {
-                if (isSafeLanding(x, 60)) { // Safe landing spot
+                if (isSafeLanding(x, 50)) { // Safe landing spot
                     if (currentFlatStart === null) {
                         currentFlatStart = x; // Start new flat area
                     }
@@ -472,7 +473,7 @@ function checkLanding(hasTouchedDown) {
             ctx.fillStyle = 'white';
             ctx.font = '24px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(statusMessage, canvas.width / 2, canvas.height / 2 - 50);
+            ctx.fillText(statusMessage, canvas.width / 2, canvas.height / 2 - 200);
             ctx.font = '18px monospace';
             ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
             ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
@@ -569,6 +570,10 @@ function checkLanding(hasTouchedDown) {
                 if (landerX < 0) landerX = 0;
                 if (landerX > canvas.width - 50) landerX = canvas.width - 50;
             }
+
+             if (hasLanded) {
+               showLandingStats();
+             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawLandingCross(); // Draw the red cross after clearing
