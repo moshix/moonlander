@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunar Lander Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            overflow: hidden;
+        }
+        #gameCanvas {
+            display: block;
+            background-color: black;
+        }
+        #metrics {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+        }
+        #legend {
+            position: absolute;
+            top: 200px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="metrics">
+        <div>Version: 4.3</div>
+        <div>Altitude: <span id="altitude">0</span> m</div>
+        <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
+        <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
+        <div>Acceleration: <span id="acceleration">0</span> m/s²</div>
+        <div>Fuel: <span id="fuel">1000</span> kg</div>
+        <div>Fuel Consumption: <span id="consumption">0</span> kg/s</div>
+    </div>
+    <div id="legend">
+        <div>Controls:</div>
+        <div>Arrow keys: Move lander</div>
+        <div>A/a: Autoland</div>
+        <div>P/p: Pause/Unpause</div>
+        <div>R/r: Reset game</div>
+        <div>M/m: Mute/Unmute</div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Load images
+        const landerImg = new Image();
+        landerImg.src = 'lander.svg';
+        const plumeImg = new Image();
+        plumeImg.src = 'plume.svg';
+        const craterImg = new Image();
+        craterImg.src = 'crater.svg';
+        const earthImg = new Image();
+        earthImg.src = 'earth.svg';
+        const commanderImg = new Image();
+        commanderImg.src = 'commander.svg';
+        const planet1Img = new Image();
+        planet1Img.src = 'planet1.svg';
+        const issImg = new Image();
+        issImg.src = 'iss.svg';
+        const asteroidImg = new Image();
+        asteroidImg.src = 'asteroid.svg'; // Load the asteroid image
+        const crashedImg = new Image();
+        crashedImg.src = 'crashed.svg'; // For crash state
+
+        // Sounds
+        const rocketSound = new Audio('rocket.mp3');
+        const crashSound = new Audio('crash.mp3');
+        crashSound.loop = false;
+        let isMuted = false;
+        let crashPlayed = false;
+        let isPaused = false;
+
+        // Global variables
+        let autolandStarted = false; // New flag to check if autoland has already started
+        const commanderOrbitSpeed = 0.0003;
+        const planet1OrbitSpeed = 0.0004;
+        const issOrbitSpeed = 0.0005;
+        const CRATER_COUNT = 10;
+        const asteroidIntervalMin = 5000; // Minimum time between asteroid appearances (ms)
+        const asteroidIntervalMax = 15000; // Maximum time between asteroid appearances (ms)
+        const GRAVITY = 1.62; // Moon gravity in m/s²
+        const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
+        const SIDE_THRUST = 4000; // Apollo lander side thrusters in N
+        const LANDER_MASS = 15103; // Mass of Apollo 11 lander in kg
+        let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, statusMessage, earthX, earthY;
+        let commanderX = 0;
+        let commanderY = 50;
+        let planet1X = 0, planet1Y = 100;
+        let issX = 0, issY = 150;
+        let commanderOrbitRadius = 50;
+        let planet1OrbitRadius = 150;
+        let issOrbitRadius = 200;
+        let hasLanded = false;
+        let isCrashed = false;
+        let score = 0;
+        let bestLandingSpot = null;
+        let preTouchdownSpeeds = { velocityY: 0, velocityX: 0 };
+        let landingMode = 'Manual Land';
+
+        // Static star positions
+        const stars = [];
+        const numStars = 100;
+
+        // Crater properties
+        const craters = [];
+
+
+        // Asteroid properties
+        let asteroid = null;
+        let asteroidStartTime = 0;
+        let nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+
+        function initializeGame() {
+            bestLandingSpot = null;
+            landerY = 50;
+            landerX = canvas.width / 2 - 25;
+            velocityY = 0;
+            //velocityX = (Math.random() < 0.5 ? -1 : 1) * 0.5; // Random lateral speed
+            velocityX = 0;
+            accelerationY = GRAVITY;
+            accelerationX = 0;
+            fuel = 1000;
+            isThrusting = false;
+            isAutolanding = false;
+            autolandActivated = false;
+            bestLandingSpot = null;
+            preTouchdownSpeeds = { velocityY: 0, velocityX: 0 };
+            statusMessage = 'Manual Mode';
+            crashPlayed = false;
+            hasLanded = false;
+            isCrashed = false;
+            score = 0;
+            isPaused = false;
+            landingMode = 'Manual Land';
+            asteroid = null; // Reset the asteroid
+            nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+            asteroidStartTime = 0;
+
+            // Random position for earth
+            earthX = Math.random() * (canvas.width - 100);
+            earthY = Math.random() * (canvas.height / 2);
+
+            // Redraw craters and stars
+            craters.length = 0;
+            generateCraters();
+
+            // Allow stars to be drawn across the entire canvas
+            stars.length = 0;
+            for (let i = 0; i < numStars; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height; // Allow stars to cover entire height
+                const size = Math.random() * 2;
+                stars.push({ x, y, size });
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+
+        // Asteroid logic
+        function createAsteroid() {
+        const direction = Math.random() < 0.5 ? 'left' : 'right'; // Asteroid comes from left or right
+        const startY = Math.random() * (canvas.height - 200); // Random starting altitude within the canvas
+
+        asteroid = {
+        x: direction === 'left' ? 0 : canvas.width, // Start from the left or right
+        y: startY,
+        speedX: direction === 'left' ? 2 : -2, // Move diagonally
+        speedY: 1, // Always moves downward
+        width: 50,
+        height: 50,
+        direction
+         };
+        }
+
+       function drawAsteroid() {
+            asteroid = true;
+            if (asteroid) {
+                ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+                // Move the asteroid diagonally
+                asteroid.x += asteroid.speedX;
+                asteroid.y += asteroid.speedY;
+
+                // Check if the asteroid goes off-screen
+                if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
+                    asteroid = null; // Remove asteroid when it goes off-screen
+                    nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+                }
+
+                // Check for collision with the lander
+                if (
+                    asteroid.x < landerX + 50 &&
+                    asteroid.x + asteroid.width > landerX &&
+                    asteroid.y < landerY + 50 &&
+                    asteroid.y + asteroid.height > landerY
+                ) {
+                    // Lander crashes due to asteroid collision
+                    isCrashed = true;
+                    asteroid = null;
+                    statusMessage = 'You Crashed!';
+                    showLandingStats();
+                }
+            }
+        }
+        function generateCraters() {
+            for (let i = 0; i < CRATER_COUNT; i++) {
+                const width = Math.random() * 50 + 50;
+                const height = width * 2; // 100% taller
+                const x = Math.random() * canvas.width;
+                const y = canvas.height - height / 2;
+                craters.push({x, y, width, height});
+            }
+        }
+
+        function isSafeLanding(xPos, width) {
+            for (let i = 0; i < craters.length; i++) {
+                const crater = craters[i];
+                if (xPos + width > crater.x && xPos < crater.x + crater.width) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function drawCraters() {
+            craters.forEach(crater => {
+                ctx.drawImage(craterImg, crater.x, crater.y, crater.width, crater.height);
+            });
+        }
+
+        function drawStars() {
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < stars.length; i++) {
+                const { x, y, size } = stars[i];
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawLander() {
+            if (isCrashed) {
+                ctx.drawImage(crashedImg, landerX, landerY, 50, 50);
+            } else {
+                ctx.drawImage(landerImg, landerX, landerY, 50, 50);
+            }
+            if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
+                ctx.drawImage(plumeImg, landerX, landerY + 50, 50, 50);
+            }
+        }
+
+        function drawEarth() {
+            ctx.drawImage(earthImg, earthX, earthY, 100, 100);
+        }
+
+        function drawCommanderModule(currentTime) {
+            const orbitRadius = canvas.width / 3;
+            commanderX = canvas.width / 2 + Math.cos(currentTime * commanderOrbitSpeed) * orbitRadius;
+            commanderY = 50 + Math.sin(currentTime * commanderOrbitSpeed) * 30;
+            ctx.drawImage(commanderImg, commanderX, commanderY, 50, 50);
+        }
+
+        function drawPlanet1(currentTime) {
+            const orbitRadius = planet1OrbitRadius;
+            planet1X = canvas.width / 2 + Math.cos(-currentTime * planet1OrbitSpeed) * orbitRadius;
+            planet1Y = 100 + Math.sin(-currentTime * planet1OrbitSpeed) * 30;
+            ctx.drawImage(planet1Img, planet1X, planet1Y, 40, 40);
+        }
+
+        function drawISS(currentTime) {
+            const orbitRadius = issOrbitRadius;
+            issX = canvas.width / 2 + Math.cos(-currentTime * issOrbitSpeed) * orbitRadius;
+            issY = 150 + Math.sin(-currentTime * issOrbitSpeed) * 20;
+            ctx.drawImage(issImg, issX, issY, 30, 30);
+        }
+
+
+function autoland() {
+    autolandActivated = true;
+    landingMode = 'Autoland Mode';
+
+    // Ensure autoland only starts once
+    if (!autolandStarted) { 
+        autolandStarted = true;
+
+        // calculate the largest flat landing area 
+        if (!bestLandingSpot) {
+            let largestFlatAreaStart = 0;
+            let largestFlatWidth = 0;
+            let currentFlatStart = null;
+            let currentFlatWidth = 0;
+
+            for (let x = 0; x < canvas.width; x += 5) {
+                if (isSafeLanding(x, 60)) { // Safe landing spot
+                    if (currentFlatStart === null) {
+                        currentFlatStart = x; // Start new flat area
+                    }
+                    currentFlatWidth += 5; // Expand flat area
+                } else { // End of flat area
+                    if (currentFlatWidth > largestFlatWidth) {
+                        largestFlatAreaStart = currentFlatStart;
+                        largestFlatWidth = currentFlatWidth;
+                    }
+                    currentFlatStart = null;
+                    currentFlatWidth = 0;
+                }
+            }
+
+            if (currentFlatWidth > largestFlatWidth) { // Handle last flat area
+                largestFlatAreaStart = currentFlatStart;
+                largestFlatWidth = currentFlatWidth;
+            }
+
+            bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
+            drawLandingCross();
+        }
+    }
+
+    // Adjust lateral thrust smoothly toward best landing spot
+    const lateralDistance = bestLandingSpot - landerX;
+    const lateralSpeedFactor = Math.abs(lateralDistance) / 200; // Reduce thrust scaling
+    const maxLateralThrust = 0.17; // Cap the lateral thrust
+
+    if (Math.abs(lateralDistance) > 32) {
+        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
+    } else {
+        accelerationX = 0; // Stop lateral movement when close enough
+    }
+
+    // **Apply Proportional Vertical Thrust**
+    if (landerY < canvas.height - 55) { // Above ground level
+        // Apply thrust based on vertical speed: more thrust if descending too fast
+        const descentSpeed = Math.abs(velocityY);
+        if (descentSpeed > 1.0) { 
+            // Slow down descent by applying upward thrust proportional to the descent speed
+            accelerationY = -0.7 * GRAVITY; // Apply stronger upward thrust if descending too fast
+            isThrusting = true;
+        } else if (descentSpeed < 0.5) {
+            // Minimal upward thrust when descending slowly to ensure soft landing
+            accelerationY = -0.3 * GRAVITY;
+            isThrusting = true;
+        } else {
+            accelerationY = GRAVITY; // Apply gravity
+            isThrusting = false;
+        }
+    } else if (landerY >= canvas.height - 30) { // On the ground
+        accelerationY = 0;
+        isThrusting = false;
+        hasTouchedDown = true;
+        checkLanding(true); // Check if landing is successful
+    }
+    }
+
+
+function checkLanding(hasTouchedDown) {
+    hasTouchedDown = true;
+    if (hasTouchedDown) {
+        // Check if lander is landing within safe speed limits
+        const safeVerticalSpeed = 1.0; // Safe vertical landing speed (in meters/sec)
+        const safeLateralSpeed = 2.0;  // Safe lateral landing speed (in meters/sec)
+
+        // Check vertical speed
+        if (Math.abs(velocityY) > safeVerticalSpeed) {
+        isCrashed = true;
+        isThrusting = false;
+        drawLander();
+        statusMessage = 'You crashed due to high vertical speed!';
+        showLandingStats();
+            return;
+        }
+
+        // Check lateral speed
+        if (Math.abs(velocityX) > safeLateralSpeed) {
+            isCrashed = true;
+            isThrusting = false;
+            drawLander();
+            statusMessage = 'You crashed! Too high lateral speed!';
+            showLandingStats();
+            return;
+        }
+
+        // Check if it's landing on a safe flat surface
+        if (!isSafeLanding(landerX, landerWidth)) {
+            console.log("Crash due to unsafe landing surface.");
+            isCrashed = true;
+            isThrusting = false;
+            drawLander();
+            statusMessage = 'You Crashed on a crater!';
+            showLandingStats();
+            return;
+        }
+
+        // If all conditions are met, it's a safe landing
+        isCrashed = false;
+        isThrusting = false;
+        statusMessage = 'You Crashed!';
+        showLandingStats();
+        //landLander(); // Trigger successful landing sequence
+    }
+}
+
+
+        function showLandingStats() {
+            ctx.fillStyle = 'white';
+            ctx.font = '24px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(statusMessage, canvas.width / 2, canvas.height / 2 - 50);
+            ctx.font = '18px monospace';
+            ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
+            ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
+        }
+
+
+          // draw a crossmark where the lander has decided to land
+          function drawLandingCross() {
+              if (bestLandingSpot !== null) { // Ensure the landing spot is chosen
+                  const crossSize = 20; // Size of the cross
+                  const crossX = bestLandingSpot; // The x-position of the landing spot
+                  const crossY = canvas.height - 55; // Near the ground level of the moon
+          
+                  // Draw vertical line of the cross
+                  ctx.strokeStyle = 'red';
+                  ctx.lineWidth = 3;
+                  ctx.beginPath();
+                  ctx.moveTo(crossX, crossY - crossSize);
+                  ctx.lineTo(crossX, crossY + crossSize);
+                  ctx.stroke();
+          
+                  // Draw horizontal line of the cross
+                  ctx.beginPath();
+                  ctx.moveTo(crossX - crossSize, crossY);
+                  ctx.lineTo(crossX + crossSize, crossY);
+                  ctx.stroke();
+              }
+          }
+
+        function displayMode() {
+            ctx.fillStyle = 'white';
+            ctx.font = '18px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(landingMode, canvas.width - 20, 40);
+        }
+
+        let lastTime = 0;
+        function gameLoop(currentTime) {
+    		// Calculate the altitude (distance from the bottom of the canvas)
+            const altitude = canvas.height - landerY - 50; // Lander height from the bottom
+            
+            // Update the stats in the HTML
+            document.getElementById('altitude').textContent = altitude.toFixed(2);
+            document.getElementById('verticalSpeed').textContent = velocityY.toFixed(2);
+            document.getElementById('lateralSpeed').textContent = velocityX.toFixed(2);
+            document.getElementById('acceleration').textContent = (Math.abs(accelerationY) + Math.abs(accelerationX)).toFixed(2);
+            document.getElementById('fuel').textContent = fuel.toFixed(2);
+            document.getElementById('consumption').textContent = isThrusting ? (5).toFixed(2) : (0).toFixed(2); // Fuel consumption during thrust
+
+            if (!lastTime) lastTime = currentTime;
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+
+            if (isPaused) {
+                ctx.fillStyle = 'white';
+                ctx.font = '24px monospace';
+                ctx.fillText('Paused', canvas.width / 2 - 50, canvas.height / 2);
+                requestAnimationFrame(gameLoop); // Continue the loop but skip updates
+                return;
+            }
+
+            if (!hasLanded && !isCrashed) {
+                if (autolandActivated) {
+                   
+                    autoland();
+
+                }
+
+                if (isThrusting && fuel > 0) {
+                    fuel -= 5 * deltaTime;
+                    if (!isMuted) rocketSound.play();
+                    if (fuel < 0) fuel = 0;
+                } else {
+                    accelerationY = GRAVITY;
+                    rocketSound.pause();
+                }
+
+                if (accelerationX !== 0 && fuel > 0) {
+                    velocityX += accelerationX * deltaTime;
+                    fuel -= 3 * deltaTime;
+                }
+
+                velocityY += accelerationY * deltaTime;
+                landerY += velocityY * deltaTime * 100;
+                landerX += velocityX * deltaTime * 100;
+
+                if (landerY >= canvas.height - 40) {
+                    landerY = canvas.height - 40;
+                    velocityY = 0;
+                    checkLanding(true);
+                }
+
+                if (landerX < 0) landerX = 0;
+                if (landerX > canvas.width - 50) landerX = canvas.width - 50;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLandingCross(); // Draw the red cross after clearing
+            drawStars();  // Stars drawn first, covering the whole canvas
+            drawEarth();
+            drawLander(currentTime);
+            drawCommanderModule(currentTime);
+            drawPlanet1(currentTime);
+            drawISS(currentTime);
+            drawCraters();  // Craters drawn last
+            drawAsteroid(currentTime);
+
+            displayMode();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            switch (e.code) {
+                case 'Space':
+                    if (!hasLanded && !isCrashed) isThrusting = true;
+                    break;
+                case 'ArrowLeft':
+                    if (!hasLanded && !isCrashed) {
+                        accelerationX = -SIDE_THRUST / LANDER_MASS;
+                        isThrusting = true;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!hasLanded && !isCrashed) {
+                        accelerationX = SIDE_THRUST / LANDER_MASS;
+                        isThrusting = true;
+                    }
+                    break;
+                case 'ArrowUp':
+                    if (!hasLanded && !isCrashed) {
+                        isThrusting = true;
+                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
+                    }
+                    break;
+                case 'KeyA':
+                    if (!hasLanded && !isCrashed) {
+                        autolandActivated = true;
+                        landingMode = 'Autoland Mode';
+                    }
+                    break;
+                case 'KeyR':
+                    initializeGame();
+                    break;
+                case 'KeyM':
+                    isMuted = !isMuted;
+                    landingMode = isMuted ? 'Muted' : 'Manual Land';
+                    rocketSound.muted = isMuted;
+                    crashSound.muted = isMuted;
+                    break;
+                case 'KeyP':
+                    isPaused = !isPaused;
+                    if (isPaused) {
+                        landingMode = 'Paused';
+                    } else {
+                        landingMode = autolandActivated ? 'Autoland Mode' : 'Manual Land';
+                        requestAnimationFrame(gameLoop);
+                    }
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                isThrusting = false;
+                rocketSound.pause();
+            }
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+                accelerationX = 0;
+            }
+        });
+
+        initializeGame();
+    </script>
+</body>
+</html>
+
