@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.31</div>
+        <div>Version: 1.32</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -377,7 +377,7 @@ function autoland() {
 //        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
 //    }
 //
-//    if (Math.abs(lateralDistance) < 4) {
+//    if (Math.abs(lateralDistance) < 5) {
 //        accelerationX = 0; // Stop lateral movement when close enough
 //     }
 
@@ -408,6 +408,7 @@ function autoland() {
            }
        } else if (landerY >= canvas.height - 0) { // On the ground
            accelerationY = 0;
+           velocityX = 0;
            accelerationX = 0;
            isThrusting = false;
            hasTouchedDown = true
