@@ -63,6 +63,7 @@
         // v 1.0 landing / crash detection
         // v 1.1 better and smoother navigation in auto-landing, plume control
         // v 1.2 relative lateral thrust in autoland
+        // v 1.3 stop acceleration after landing
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -143,8 +144,7 @@
             landerY = 50;
             landerX = canvas.width / 2 - 25;
             velocityY = 0;
-            //velocityX = (Math.random() < 0.5 ? -1 : 1) * 0.5; // Random lateral speed
-            velocityX = 0;
+            velocityX = 1;
             accelerationY = GRAVITY;
             accelerationX = 0;
             fuel = 1000;
@@ -408,6 +408,7 @@ function autoland() {
            }
        } else if (landerY >= canvas.height - 35) { // On the ground
            accelerationY = 0;
+           accelerationX = 0;
            isThrusting = false;
            hasTouchedDown = true
            checkLanding(true); // Check if landing is successful
@@ -437,6 +438,7 @@ function checkLanding(hasTouchedDown) {
 
         // Check lateral speed
         if (Math.abs(velocityX) > safeLateralSpeed) {
+            accelerationX = 0;
             isCrashed = true;
             isThrusting = false;
             bestLandingSpot = false;
@@ -450,6 +452,7 @@ function checkLanding(hasTouchedDown) {
         if (!isSafeLanding(landerX, landerWidth)) {
             console.log("Crash due to unsafe landing surface.");
             isCrashed = true;
+            accelerationX = 0;
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
@@ -462,6 +465,7 @@ function checkLanding(hasTouchedDown) {
         isCrashed = false;
         isThrusting = false;
         bestLandingSpot = false;
+        accelerationX = 0;
         statusMessage = 'You Crashed!';
         showLandingStats();
         //landLander(); // Trigger successful landing sequence
