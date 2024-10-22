@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.33</div>
+        <div>Version: 1.34</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -341,7 +341,7 @@ function autoland() {
     // Adjust lateral thrust smoothly toward best landing spot
     const lateralDistance = bestLandingSpot - landerX;
     const lateralSpeedFactor = Math.abs(lateralDistance) / 200; // Reduce thrust scaling
-    let maxLateralThrust = 0.17; // Cap the lateral thrust
+    let maxLateralThrust = 0.16; // Cap the lateral thrust
     const canvasWidthFactor = canvas.width / 10; // Example: scaling factor is 1/10th of canvas
     let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
     const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
@@ -357,16 +357,16 @@ function autoland() {
 
 //    // lateral thrust scaling algorithm. works about 75%
 //    if (Math.abs(lateralDistance) > 50 && landerY > canvas.height + 400) {
-//        let maxLateralThrust = 0.19; // Cap the lateral thrust
+//        let maxLateralThrust = 0.17; // Cap the lateral thrust
 //        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
 //     }
 //    if (Math.abs(lateralDistance) > 32 && landerY > canvas.height + 200) {
-//        let maxLateralThrust = 0.18; // Cap the lateral thrust
+//        let maxLateralThrust = 0.15; // Cap the lateral thrust
 //        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
 //     }
 //
 //    if (Math.abs(lateralDistance) > 32 && landerY < canvas.height + 100) {
-//        let maxLateralThrust = 0.15; // Cap the lateral thrust
+//        let maxLateralThrust = 0.13; // Cap the lateral thrust
 //        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
 //     }
 //
@@ -406,7 +406,7 @@ function autoland() {
                accelerationY =  0 * GRAVITY; // Only gravity is applied to pull it down
                isThrusting = false;
            }
-       } else if (landerY >= canvas.height - 0) { // On the ground
+       } else if (landerY >= canvas.height - 55) { // On the ground
            accelerationY = 0;
            velocityX = 0;
            accelerationX = 0;
