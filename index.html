@@ -351,7 +351,7 @@ function autoland() {
     const maxLateralSpeed = 0.30; // Maximum allowed lateral speed
  
     // Ensure lateral speed doesn't exceed max
-    if ( ((Math.abs(velocityX) < maxLateralSpeed)) &&  (Math.abs(lateralDistance)) ) > 4 {
+    if ( ((Math.abs(velocityX) < maxLateralSpeed)) &&  (Math.abs(lateralDistance)  > 4) ) {
         const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
         const scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
