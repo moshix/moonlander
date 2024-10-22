@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.3.5</div>
+        <div>Version: 1.3.6</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -341,13 +341,13 @@ function autoland() {
     // Adjust lateral thrust smoothly toward best landing spot
     const lateralDistance = bestLandingSpot - landerX;
     const lateralSpeedFactor = Math.abs(lateralDistance) / 250; // Reduce thrust scaling
-    let maxLateralThrust = 0.13; // Cap the lateral thrust
+    let maxLateralThrust = 0.12; // Cap the lateral thrust
     const canvasWidthFactor = canvas.width / 10; // Example: scaling factor is 1/10th of canvas
     let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
     const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
     let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
 
-    if (Math.abs(lateralDistance) > 1) {
+    if (Math.abs(lateralDistance) > 2) {
         scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
         accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
     } else {
