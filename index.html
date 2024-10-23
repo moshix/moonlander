@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.5.1</div>
+        <div>Version: 1.5.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -586,8 +586,8 @@ function checkLanding(hasTouchedDown) {
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
 
-                if (landerY >= canvas.height - 55) {
-                    landerY = canvas.height - 53;
+                if (landerY >= canvas.height - 54) {
+                    landerY = canvas.height - 51;
                     velocityY = 0;
                     velocityX = 0;
                     checkLanding(true);
