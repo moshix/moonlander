@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.4.9.1</div>
+        <div>Version: 1.5.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -64,7 +64,9 @@
         // v 1.1 better and smoother navigation in auto-landing, plume control
         // v 1.2 relative lateral thrust in autoland
         // v 1.3 stop acceleration after landing
-
+        // v 1.4 adaptive lateral thrust management
+        // v 1.5 landing stats and game play enhancments
+        
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -501,6 +503,7 @@ function checkLanding(hasTouchedDown) {
             ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
             ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
             ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
+            requestAnimationFrame(gameLoop);
         }
 
 
@@ -584,8 +587,8 @@ function checkLanding(hasTouchedDown) {
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
 
-                if (landerY >= canvas.height - 55) {
-                    landerY = canvas.height - 55;
+                if (landerY >= canvas.height - 50) {
+                    landerY = canvas.height - 50;
                     velocityY = 0;
                     velocityX = 0;
                     checkLanding(true);
