@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.5.6</div>
+        <div>Version: 1.4.9.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -64,9 +64,7 @@
         // v 1.1 better and smoother navigation in auto-landing, plume control
         // v 1.2 relative lateral thrust in autoland
         // v 1.3 stop acceleration after landing
-        // v 1.4 adaptive lateral thrust management
-        // v 1.5 landing stats and game play enhancments
-        
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -274,8 +272,7 @@
             } else {
                 ctx.drawImage(landerImg, landerX, landerY, 50, 50);
             }
-           // if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
-            if (isThrusting && fuel > 0 && !isCrashed) {    
+            if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
                 ctx.drawImage(plumeImg, landerX, landerY + 50, 50, 50);
             }
         }
@@ -504,11 +501,6 @@ function checkLanding(hasTouchedDown) {
             ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
             ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
             ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
-                ctx.fillStyle = 'white';
-                ctx.font = '28px monospace';
-                ctx.fillText('Landed!!', canvas.width / 2 - 50, canvas.height / 2);
-                requestAnimationFrame(gameLoop); // Continue the loop but skip updates
-          
         }
 
 
@@ -569,7 +561,9 @@ function checkLanding(hasTouchedDown) {
 
             if (!hasLanded && !isCrashed) {
                 if (autolandActivated) {
+                   
                     autoland();
+
                 }
 
                 if (isThrusting && fuel > 0) {
@@ -590,12 +584,11 @@ function checkLanding(hasTouchedDown) {
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
 
-                if (landerY >= canvas.height - 50) {
-                    landerY = canvas.height - 50;
+                if (landerY >= canvas.height - 55) {
+                    landerY = canvas.height - 55;
                     velocityY = 0;
                     velocityX = 0;
                     checkLanding(true);
-                    hasLanded = true;
                 }
 
                 if (landerX < 0) landerX = 0;
@@ -607,9 +600,7 @@ function checkLanding(hasTouchedDown) {
              }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (!hasLanded) {
-                drawLandingCross(); // show where you want to land
-            }
+            drawLandingCross(); // Draw the red cross after clearing
             drawStars();  // Stars drawn first, covering the whole canvas
             drawEarth();
             drawLander(currentTime);
@@ -688,4 +679,3 @@ function checkLanding(hasTouchedDown) {
     </script>
 </body>
 </html>
-
