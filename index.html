@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.5.0</div>
+        <div>Version: 1.5.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -503,7 +503,11 @@ function checkLanding(hasTouchedDown) {
             ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
             ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
             ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
-            requestAnimationFrame(gameLoop);
+                ctx.fillStyle = 'white';
+                ctx.font = '28px monospace';
+                ctx.fillText('Landed!!', canvas.width / 2 - 50, canvas.height / 2);
+                requestAnimationFrame(gameLoop); // Continue the loop but skip updates
+          
         }
 
 
@@ -592,6 +596,7 @@ function checkLanding(hasTouchedDown) {
                     velocityY = 0;
                     velocityX = 0;
                     checkLanding(true);
+                    hasLanded = true;
                 }
 
                 if (landerX < 0) landerX = 0;
