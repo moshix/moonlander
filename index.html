@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.4.9</div>
+        <div>Version: 1.4.9.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -537,7 +537,7 @@ function checkLanding(hasTouchedDown) {
         let lastTime = 0;
         function gameLoop(currentTime) {
     		// Calculate the altitude (distance from the bottom of the canvas)
-            const altitude = canvas.height - landerY - 50; // Lander height from the bottom
+            const altitude = canvas.height - landerY - 55; // Lander height from the bottom
             
             // Update the stats in the HTML
             document.getElementById('altitude').textContent = altitude.toFixed(2);
@@ -584,9 +584,10 @@ function checkLanding(hasTouchedDown) {
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
 
-                if (landerY >= canvas.height - 40) {
-                    landerY = canvas.height - 40;
+                if (landerY >= canvas.height - 55) {
+                    landerY = canvas.height - 55;
                     velocityY = 0;
+                    velocityX = 0;
                     checkLanding(true);
                 }
 
