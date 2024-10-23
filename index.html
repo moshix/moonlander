@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.4.7</div>
+        <div>Version: 1.4.9</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -441,7 +441,7 @@ function checkLanding(hasTouchedDown) {
     hasTouchedDown = true;
     if (hasTouchedDown) {
         // Check if lander is landing within safe speed limits
-        const safeVerticalSpeed = 1.0; // Safe vertical landing speed (in meters/sec)
+        const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
         const safeLateralSpeed = 2.0;  // Safe lateral landing speed (in meters/sec)
 
         // Check vertical speed
