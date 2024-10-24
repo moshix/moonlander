@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.8</div>
+        <div>Version: 1.9</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -69,6 +69,7 @@
         // v 1.6 mobile browsers autoland button
         // v 1.7 Status message after landing
         // v 1.8 Point system
+        // v 1.9 clean up stats and crash sound
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -175,6 +176,7 @@
             asteroid = null; // Reset the asteroid
             nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
             asteroidStartTime = 0;
+            createAsteroid();
 
             // Random position for earth
             earthX = Math.random() * (canvas.width - 100);
@@ -227,6 +229,7 @@
 
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
+                ctx.textAlign = "center";
                 ctx.fillText("Crashed", canvas.width /2 , 80); 
                 ctx.font = "16px Arial"; // for stats smaller font
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
@@ -515,6 +518,8 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         drawLander();
+        drawAsteroid();
+        if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
         showLandingStats();
             return;
@@ -527,8 +532,10 @@ function checkLanding(hasTouchedDown) {
             isThrusting = false;
             bestLandingSpot = false;
             drawLander();
-            statusMessage = 'You crashed! Too high lateral speed!';
-            showLandingStats();
+            drawAsteroid();
+            if (!isMuted) crashSound.play();
+            //statusMessage = 'You crashed! Too high lateral speed!';
+            //showLandingStats();
             return;
         }
 
@@ -540,8 +547,9 @@ function checkLanding(hasTouchedDown) {
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
-            statusMessage = 'You Crashed on a crater!';
-            showLandingStats();
+            if (!isMuted) crashSound.play();
+            //statusMessage = 'You Crashed on a crater!';
+            //showLandingStats();
             return;
         }
 
@@ -550,8 +558,8 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         accelerationX = 0;
-        statusMessage = 'You Crashed!';
-        showLandingStats();
+        //statusMessage = 'You Crashed!';
+        //showLandingStats();
         //landLander(); // Trigger successful landing sequence
     }
 }
