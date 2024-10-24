@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.7</div>
+        <div>Version: 1.8</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -68,6 +68,7 @@
         // v 1.5 game play fixes
         // v 1.6 mobile browsers autoland button
         // v 1.7 Status message after landing
+        // v 1.8 Point system
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -197,13 +198,52 @@
 
         function drawStatusLine() {
             ctx.font = "34px Arial"; // Set font size and type
-        
+            oldVelocityXF = Number(oldVelocityX).toFixed(2);
+            oldVelocityYF = Number(oldVelocityY).toFixed(2);
+
             if (hasLanded && !isCrashed) {
+                points = fuel - ( (oldVelocityX * 10) + (oldVelocityY * 10));
+                pointsF = Number(points).toFixed(0); // make integer
                 ctx.fillStyle = "green"; // Green color for successful landing
+                ctx.textAlign = "center";
                 ctx.fillText("Landed", canvas.width /2, 80); 
+                ctx.font = "16px Arial"; // for stats smaller font
+                message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
+                ctx.textAlign = "center";
+                ctx.fillText(message, canvas.width /2, 100); 
+
+                // points system
+                ctx.fillStyle = "orange"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "20px Arial"; // for stats smaller font
+                message = "Points:  " + pointsF;
+                ctx.textAlign = "center";
+                ctx.fillText(message, canvas.width /2, 135); 
+                // Resume to restart message
+                ctx.fillStyle = "white"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "28px Arial"; // for stats smaller font
+                ctx.fillText("Press R to restart", canvas.width /2, 170); 
+
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
                 ctx.fillText("Crashed", canvas.width /2 , 80); 
+                ctx.font = "16px Arial"; // for stats smaller font
+                message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
+                ctx.textAlign = "center";
+                ctx.fillText(message, canvas.width /2, 100); 
+                // points system
+                ctx.fillStyle = "orange"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "20px Arial"; // for stats smaller font
+                message = "Points: 0";
+                ctx.textAlign = "center";
+                ctx.fillText(message, canvas.width /2, 135); 
+                // Resume to restart message
+                ctx.fillStyle = "white"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "28px Arial"; // for stats smaller font
+                ctx.fillText("Press R to restart", canvas.width /2, 170); 
             }
         }
 
@@ -450,6 +490,7 @@ function autoland() {
            }
        } else if (landerY >= canvas.height - 55) { // On the ground
            accelerationY = 0;
+           oldVelocityX = velocityX;
            velocityX = 0;
            accelerationX = 0;
            isThrusting = false;
@@ -632,10 +673,15 @@ function createAutolandButton() {
                 velocityY += accelerationY * deltaTime;
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
+               
+                oldVelocityY =  velocityY; // to print stats at the end
+                oldVelocityX =  velocityX;
 
                 if (landerY >= canvas.height - 54) {
                     landerY = canvas.height - 50;
+                    oldVelocityY =  velocityY; // to print stats at the end
                     velocityY = 0;
+                    oldVelocityX =  velocityX;
                     velocityX = 0;
                     hasLanded = true;
                     checkLanding(true);
@@ -645,9 +691,9 @@ function createAutolandButton() {
                 if (landerX > canvas.width - 50) landerX = canvas.width - 50;
             }
 
-             if (hasLanded) {
-               showLandingStats();
-             }
+             //if (hasLanded) {
+             //  showLandingStats();
+             //}
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!hasLanded) {
