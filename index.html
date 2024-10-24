@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.6</div>
+        <div>Version: 1.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -67,6 +67,7 @@
         // v 1.4 adaptive lateral thrust mgmt
         // v 1.5 game play fixes
         // v 1.6 mobile browsers autoland button
+        // v 1.7 Status message after landing
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -192,6 +193,18 @@
             }
 
             requestAnimationFrame(gameLoop);
+        }
+
+        function drawStatusLine() {
+            ctx.font = "34px Arial"; // Set font size and type
+        
+            if (hasLanded && !isCrashed) {
+                ctx.fillStyle = "green"; // Green color for successful landing
+                ctx.fillText("Landed", canvas.width /2, 80); 
+            } else if (isCrashed) {
+                ctx.fillStyle = "red"; // Red color for crash
+                ctx.fillText("Crashed", canvas.width /2 , 80); 
+            }
         }
 
 
@@ -453,7 +466,7 @@ function checkLanding(hasTouchedDown) {
     if (hasTouchedDown) {
         // Check if lander is landing within safe speed limits
         const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
-        const safeLateralSpeed = 2.0;  // Safe lateral landing speed (in meters/sec)
+        const safeLateralSpeed = 1.8;  // Safe lateral landing speed (in meters/sec)
 
         // Check vertical speed
         if (Math.abs(velocityY) > safeVerticalSpeed) {
@@ -650,6 +663,8 @@ function createAutolandButton() {
             drawAsteroid(currentTime);
 
             displayMode();
+
+			drawStatusLine();
 
             requestAnimationFrame(gameLoop);
         }
