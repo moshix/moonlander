@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9</div>
+        <div>Version: 1.9.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -579,7 +579,7 @@ function checkLanding(hasTouchedDown) {
 
           // draw a crossmark where the lander has decided to land
           function drawLandingCross() {
-              if (bestLandingSpot !== null) { // Ensure the landing spot is chosen
+              if (bestLandingSpot !== null && !hasLanded) { // Ensure the landing spot is chosen
                   const crossSize = 20; // Size of the cross
                   const crossX = bestLandingSpot; // The x-position of the landing spot
                   const crossY = canvas.height - 35; // Near the ground level of the moon
@@ -601,6 +601,7 @@ function checkLanding(hasTouchedDown) {
           }
 
 function isMobile() {
+    // is it a mobile client?
     return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
