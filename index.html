@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.3</div>
+        <div>Version: 1.9.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -108,8 +108,8 @@
         // Global variables
         const landerWidth = 50;
         const commanderOrbitSpeed = 0.0001;
-        const planet1OrbitSpeed = 0.00001;
-        const issOrbitSpeed = 0.00003;
+        const planet1OrbitSpeed = 0.0001;
+        const issOrbitSpeed = 0.00005;
         const CRATER_COUNT = 10;
         const asteroidIntervalMin = 5000; // Minimum time between asteroid appearances (ms)
         const asteroidIntervalMax = 15000; // Maximum time between asteroid appearances (ms)
@@ -121,9 +121,9 @@
         let commanderX = 0;
         let commanderY = 50;
         let planet1X = 0, planet1Y = 100;
-        let issX = 0, issY = 150;
-        let planet1OrbitRadius = 150;
-        let issOrbitRadius = 200;
+        let issX = 1, issY = 550;
+        let planet1OrbitRadius = 050;
+        let issOrbitRadius = 400;
         let hasLanded = false;
         let isCrashed = false;
         let score = 0;
