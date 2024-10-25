@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.1</div>
+        <div>Version: 2.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -72,6 +72,7 @@
         // v 1.9 clean up stats and crash sound
         // v 2.0 small improvements
         // v 2.1 astronaut Bob !
+        // v 2.2 McDonalds is now on the moon! lunarMac special: $519
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -99,6 +100,8 @@
         crashedImg.src = 'crashed.svg'; // For crash state
         const astronautImg = new Image();
         astronautImg.src = 'astronaut.svg';
+        const mcdonaldImg = new Image();
+        mcdonaldImg.src = 'mcdonald.svg';
 
         // Sounds
         const rocketSound = new Audio('rocket.mp3');
@@ -202,6 +205,35 @@
             requestAnimationFrame(gameLoop);
         }
 
+        function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
+        
+            const astronautWidth = landerWidth / 2; // Astronaut width is 1/3 of lander width
+            const astronautHeight = landerHeight / 2; // Astronaut height is 1/3 of lander height
+            // Initial position: to the right of the lander
+            let astronautX = landerX + landerWidth + 10 + 20; // after astronaut
+            let astronautY = landerY + landerHeight - astronautHeight; // Align bottom with lander
+            let mcdonaldX = astronautX;
+        
+            // Check if the right side position is safe
+            if (astronautX + astronautWidth <= canvas.width && isSafeLanding(astronautX, astronautWidth)) {
+                // Right side is safe, proceed to draw
+            } else {
+                // Right side is not safe, try left side
+                mcdonaldX = landerX - astronautWidth - 40;
+        
+                // Check if the left side position is safe
+                if (astronautX >= 0 && isSafeLanding(astronautX, astronautWidth)) {
+                    // Left side is safe, proceed to draw
+                } else {
+                    console.log("No suitable position for mcdonald found.");
+                    return; // Exit if no valid position is found
+                }
+            }
+        
+            // Draw the astronaut SVG at the calculated position
+            //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
+            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3, astronautHeight * 3);
+        }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
             const astronautWidth = landerWidth / 2; // Astronaut width is 1/3 of lander width
@@ -232,8 +264,6 @@
             ctx.drawImage(astronautImg, astronautX, astronautY, astronautWidth, astronautHeight);
         }
 
-
-
         function drawStatusLine() {
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
@@ -250,6 +280,7 @@
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 100);
 				drawAstronaut(landerX, landerY, landerWidth, landerHeight);
+				drawMcdonald(landerX, landerY, landerWidth, landerHeight);
 
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
@@ -263,6 +294,12 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
+
+                // motivational message
+                ctx.fillStyle = "#FFCC00"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "17px Arial"; // for stats smaller font
+                ctx.fillText("Taste the new lunar burgher now!", canvas.width /2, 210);
 
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
