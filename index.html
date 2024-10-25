@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.1</div>
+        <div>Version: 1.9.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -306,6 +306,7 @@
             }
         }
 
+        // is the lander lander on a crater??
         function isSafeLanding(xPos, width) {
             for (let i = 0; i < craters.length; i++) {
                 const crater = craters[i];
@@ -497,7 +498,7 @@ function autoland() {
            velocityX = 0;
            accelerationX = 0;
            isThrusting = false;
-           hasTouchedDown = true
+           hasTouchedDown = true;
            checkLanding(true); // Check if landing is successful
        }
 
