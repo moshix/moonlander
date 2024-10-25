@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.6</div>
+        <div>Version: 2.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -208,7 +208,7 @@
                 ctx.fillStyle = "green"; // Green color for successful landing
                 ctx.textAlign = "center";
                 ctx.fillText("Landed", canvas.width /2, 80);
-                ctx.font = "16px Arial"; // for stats smaller font
+                ctx.font = "20px Arial"; // for stats smaller font
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 100);
@@ -216,7 +216,7 @@
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
                 ctx.textAlign = "center";
-                ctx.font = "20px Arial"; // for stats smaller font
+                ctx.font = "25px Arial"; // for stats smaller font
                 message = "Points:  " + pointsF;
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 135);
@@ -230,14 +230,14 @@
                 ctx.fillStyle = "red"; // Red color for crash
                 ctx.textAlign = "center";
                 ctx.fillText("Crashed", canvas.width /2 , 80);
-                ctx.font = "16px Arial"; // for stats smaller font
+                ctx.font = "20px Arial"; // for stats smaller font
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 100);
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
                 ctx.textAlign = "center";
-                ctx.font = "20px Arial"; // for stats smaller font
+                ctx.font = "25px Arial"; // for stats smaller font
                 message = "Points: 0";
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 135);
@@ -411,7 +411,7 @@
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
-             // **Cap lateral speed to 0.35 m/sec**
+             // Cap lateral speed to x m/sec
            const maxLateralSpeed = 0.38; // Maximum allowed lateral speed
         
         
@@ -427,7 +427,7 @@
             }
         
         
-            // **Apply Proportional Vertical Thrust**
+            // Apply Proportional Vertical Thrust**
             if (landerY < canvas.height - 55) { // Above ground
                    if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
                        // Apply upward thrust if descending too fast
@@ -453,7 +453,7 @@
                } else if (landerY >= canvas.height - 55) { // On the ground
                    accelerationY = 0;
                    oldVelocityX = velocityX;
-                   velocityX = 0;
+                   //velocityX = 0;
                    accelerationX = 0;
                    isThrusting = false;
                    hasTouchedDown = true
@@ -566,7 +566,7 @@ function isMobile() {
 
 function createAutolandButton() {
     const button = document.createElement("button");
-    button.innerHTML = "autoland now";
+    button.innerHTML = "autoland now!";
     button.style.position = "absolute";
     button.style.top = "90px";
     button.style.right = "5px";
