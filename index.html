@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.4</div>
+        <div>Version: 1.9.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -370,98 +370,98 @@
         }
 
 
-function autoland() {
-    autolandActivated = true;
-    landingMode = 'Autoland Mode';
-
-        // calculate the largest flat landing area
-            let largestFlatAreaStart = 0;
-            let largestFlatWidth = 0;
-            let currentFlatStart = null;
-            let currentFlatWidth = 0;
-
-            for (let x = 0; x < canvas.width; x += 5) {
-                if (isSafeLanding(x, 50)) { // Safe landing spot
-                    if (currentFlatStart === null) {
-                        currentFlatStart = x; // Start new flat area
+        function autoland() {
+            autolandActivated = true;
+            landingMode = 'Autoland Mode';
+        
+                // calculate the largest flat landing area
+                    let largestFlatAreaStart = 0;
+                    let largestFlatWidth = 0;
+                    let currentFlatStart = null;
+                    let currentFlatWidth = 0;
+        
+                    for (let x = 0; x < canvas.width; x += 5) {
+                        if (isSafeLanding(x, 50)) { // Safe landing spot
+                            if (currentFlatStart === null) {
+                                currentFlatStart = x; // Start new flat area
+                            }
+                            currentFlatWidth += 5; // Expand flat area
+                        } else { // End of flat area
+                            if (currentFlatWidth > largestFlatWidth) {
+                                largestFlatAreaStart = currentFlatStart;
+                                largestFlatWidth = currentFlatWidth;
+                            }
+                            currentFlatStart = null;
+                            currentFlatWidth = 0;
+                        }
                     }
-                    currentFlatWidth += 5; // Expand flat area
-                } else { // End of flat area
-                    if (currentFlatWidth > largestFlatWidth) {
+        
+                    if (currentFlatWidth > largestFlatWidth) { // Handle last flat area
                         largestFlatAreaStart = currentFlatStart;
                         largestFlatWidth = currentFlatWidth;
                     }
-                    currentFlatStart = null;
-                    currentFlatWidth = 0;
-                }
-            }
-
-            if (currentFlatWidth > largestFlatWidth) { // Handle last flat area
-                largestFlatAreaStart = currentFlatStart;
-                largestFlatWidth = currentFlatWidth;
-            }
-
-            bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
-            drawLandingCross();
-
-
-    // Adjust lateral thrust smoothly toward best landing spot
-    const lateralDistance = bestLandingSpot - landerX;
-    let maxLateralThrust = 0.11; // Cap the lateral thrust
-    let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
-    const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
-    let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
-
-     // **Cap lateral speed to 0.35 m/sec**
-   const maxLateralSpeed = 0.38; // Maximum allowed lateral speed
-
-
-   if (Math.abs(lateralDistance) > 1) {
-        scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
-       if ( Math.abs(velocityX) < maxLateralSpeed) {
-        accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
-       } else {
-           accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
-       }
-    } else {
-        accelerationX = 0; // Stop lateral movement when close enough
-    }
-
-
-    // **Apply Proportional Vertical Thrust**
-    if (landerY < canvas.height - 55) { // Above ground
-           if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
-               // Apply upward thrust if descending too fast
-               if (velocityY > 1.0) {
-                   accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
-                   isThrusting = true;
-               } else if (velocityY < 0.4) {
-                   accelerationY = -0.1 * GRAVITY;
-                   isThrusting = true;
-               } else if (velocityY < 0.2) {
-                   // Minimal thrust for a gentle landing
-                   accelerationY = -0.05 * GRAVITY;
-                   isThrusting = true;
+        
+                    bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
+                    drawLandingCross();
+        
+        
+            // Adjust lateral thrust smoothly toward best landing spot
+            const lateralDistance = bestLandingSpot - landerX;
+            let maxLateralThrust = 0.11; // Cap the lateral thrust
+            let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
+            const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
+            let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
+        
+             // **Cap lateral speed to 0.35 m/sec**
+           const maxLateralSpeed = 0.38; // Maximum allowed lateral speed
+        
+        
+           if (Math.abs(lateralDistance) > 1) {
+                scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
+               if ( Math.abs(velocityX) < maxLateralSpeed) {
+                accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
                } else {
-                   accelerationY =  -0.00  * GRAVITY; // Let gravity pull the lander down gently
-                   isThrusting = false;
+                   accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
                }
-           } else {
-               // No upward thrust if the lander is already moving upwards (velocityY <= 0)
-               accelerationY =  0 * GRAVITY; // Only gravity is applied to pull it down
-               isThrusting = false;
-           }
-       } else if (landerY >= canvas.height - 55) { // On the ground
-           accelerationY = 0;
-           oldVelocityX = velocityX;
-           velocityX = 0;
-           accelerationX = 0;
-           isThrusting = false;
-           hasTouchedDown = true
-           checkLanding(true); // Check if landing is successful
-       }
-
- }
+            } else {
+                accelerationX = 0; // Stop lateral movement when close enough
+            }
+        
+        
+            // **Apply Proportional Vertical Thrust**
+            if (landerY < canvas.height - 55) { // Above ground
+                   if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
+                       // Apply upward thrust if descending too fast
+                       if (velocityY > 1.0) {
+                           accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
+                           isThrusting = true;
+                       } else if (velocityY < 0.4) {
+                           accelerationY = -0.1 * GRAVITY;
+                           isThrusting = true;
+                       } else if (velocityY < 0.2) {
+                           // Minimal thrust for a gentle landing
+                           accelerationY = -0.05 * GRAVITY;
+                           isThrusting = true;
+                       } else {
+                           accelerationY =  -0.00  * GRAVITY; // Let gravity pull the lander down gently
+                           isThrusting = false;
+                       }
+                   } else {
+                       // No upward thrust if the lander is already moving upwards (velocityY <= 0)
+                       accelerationY =  0 * GRAVITY; // Only gravity is applied to pull it down
+                       isThrusting = false;
+                   }
+               } else if (landerY >= canvas.height - 55) { // On the ground
+                   accelerationY = 0;
+                   oldVelocityX = velocityX;
+                   velocityX = 0;
+                   accelerationX = 0;
+                   isThrusting = false;
+                   hasTouchedDown = true
+                   checkLanding(true); // Check if landing is successful
+               }
+        
+         }
 
 
 
@@ -594,6 +594,7 @@ function createAutolandButton() {
         }
 
         let lastTime = 0;
+        
         function gameLoop(currentTime) {
     		// Calculate the altitude (distance from the bottom of the canvas)
             const altitude = canvas.height - landerY - 55; // Lander height from the bottom
@@ -675,7 +676,7 @@ function createAutolandButton() {
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
-            drawAsteroid(currentTime);
+            //drawAsteroid(currentTime);
 
             displayMode();
 
