@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.5</div>
+        <div>Version: 1.9.6</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -41,12 +41,11 @@
         <div>Fuel Consumption: <span id="consumption">0</span> kg/s</div>
     </div>
     <div id="legend">
-        <div>Controls:</div>
-        <div>Arrow keys: Move lander</div>
-        <div>A/a: Autoland</div>
-        <div>P/p: Pause/Unpause</div>
-        <div>R/r: Reset game</div>
-        <div>M/m: Mute/Unmute</div>
+        <div>^ < > </div>
+        <div>A:          Autoland</div>
+        <div>P:          Pause/Unpause</div>
+        <div>R:          Restart</div>
+        <div>M:          Mute/Unmute</div>
     </div>
     <script>
 
@@ -110,7 +109,7 @@
         const commanderOrbitSpeed = 0.0001;
         const planet1OrbitSpeed = 0.0001;
         const issOrbitSpeed = 0.00005;
-        const CRATER_COUNT = 10;
+        const CRATER_COUNT = 9;
         const asteroidIntervalMin = 5000; // Minimum time between asteroid appearances (ms)
         const asteroidIntervalMax = 15000; // Maximum time between asteroid appearances (ms)
         const GRAVITY = 1.62; // Moon gravity in m/s²
@@ -133,7 +132,7 @@
 
         // Static star positions
         const stars = [];
-        const numStars = 100;
+        const numStars = 80;
 
         // Crater properties
         const craters = [];
@@ -569,8 +568,8 @@ function createAutolandButton() {
     const button = document.createElement("button");
     button.innerHTML = "Autoland";
     button.style.position = "absolute";
-    button.style.top = "10px";
-    button.style.right = "10px";
+    button.style.top = "40px";
+    button.style.right = "5px";
     button.style.zIndex = "10"; // Ensure it appears above the canvas
     button.style.padding = "10px 20px";
     button.style.fontSize = "18px";
