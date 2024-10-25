@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.2</div>
+        <div>Version: 2.2.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -117,7 +117,7 @@
         const commanderOrbitSpeed = 0.0001;
         const planet1OrbitSpeed = 0.0001;
         const issOrbitSpeed = 0.00005;
-        const CRATER_COUNT = 9;
+        let    CRATER_COUNT = 9;
         const asteroidIntervalMin = 5000; // Minimum time between asteroid appearances (ms)
         const asteroidIntervalMax = 15000; // Maximum time between asteroid appearances (ms)
         const GRAVITY = 1.62; // Moon gravity in m/s²
@@ -154,6 +154,7 @@
 		window.onload = function() {
     if (isMobile()) {
         createAutolandButton(); // Show the autoland button if on a mobile device
+        CRATER_COUNT = 5; // fewer craters on mobile
     }
 };
 
