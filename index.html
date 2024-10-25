@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 1.9.2</div>
+        <div>Version: 1.9.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -49,6 +49,7 @@
         <div>M/m: Mute/Unmute</div>
     </div>
     <script>
+
         // Copyright 2024 by moshix
         // All rights reserved
         // Moon Lander
@@ -121,7 +122,6 @@
         let commanderY = 50;
         let planet1X = 0, planet1Y = 100;
         let issX = 0, issY = 150;
-        let commanderOrbitRadius = 50;
         let planet1OrbitRadius = 150;
         let issOrbitRadius = 200;
         let hasLanded = false;
@@ -208,11 +208,11 @@
                 pointsF = Number(points).toFixed(0); // make integer
                 ctx.fillStyle = "green"; // Green color for successful landing
                 ctx.textAlign = "center";
-                ctx.fillText("Landed", canvas.width /2, 80); 
+                ctx.fillText("Landed", canvas.width /2, 80);
                 ctx.font = "16px Arial"; // for stats smaller font
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
                 ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 100); 
+                ctx.fillText(message, canvas.width /2, 100);
 
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
@@ -220,33 +220,33 @@
                 ctx.font = "20px Arial"; // for stats smaller font
                 message = "Points:  " + pointsF;
                 ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 135); 
+                ctx.fillText(message, canvas.width /2, 135);
                 // Resume to restart message
                 ctx.fillStyle = "white"; // Green color for successful landing
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
-                ctx.fillText("Press R to restart", canvas.width /2, 170); 
+                ctx.fillText("Press R to restart", canvas.width /2, 170);
 
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
                 ctx.textAlign = "center";
-                ctx.fillText("Crashed", canvas.width /2 , 80); 
+                ctx.fillText("Crashed", canvas.width /2 , 80);
                 ctx.font = "16px Arial"; // for stats smaller font
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
                 ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 100); 
+                ctx.fillText(message, canvas.width /2, 100);
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
                 ctx.textAlign = "center";
                 ctx.font = "20px Arial"; // for stats smaller font
                 message = "Points: 0";
                 ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 135); 
+                ctx.fillText(message, canvas.width /2, 135);
                 // Resume to restart message
                 ctx.fillStyle = "white"; // Green color for successful landing
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
-                ctx.fillText("Press R to restart", canvas.width /2, 170); 
+                ctx.fillText("Press R to restart", canvas.width /2, 170);
             }
         }
 
@@ -374,7 +374,7 @@ function autoland() {
     autolandActivated = true;
     landingMode = 'Autoland Mode';
 
-        // calculate the largest flat landing area 
+        // calculate the largest flat landing area
             let largestFlatAreaStart = 0;
             let largestFlatWidth = 0;
             let currentFlatStart = null;
@@ -403,70 +403,29 @@ function autoland() {
 
             bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
             drawLandingCross();
-    
+
 
     // Adjust lateral thrust smoothly toward best landing spot
     const lateralDistance = bestLandingSpot - landerX;
-    const lateralSpeedFactor = Math.abs(lateralDistance) / 200; // Reduce thrust scaling
     let maxLateralThrust = 0.11; // Cap the lateral thrust
-    const canvasWidthFactor = canvas.width / 10; // Example: scaling factor is 1/10th of canvas
     let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
     const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
     let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
 
      // **Cap lateral speed to 0.35 m/sec**
    const maxLateralSpeed = 0.38; // Maximum allowed lateral speed
- 
- //   // Ensure lateral speed doesn't exceed max
- //   if ( ((Math.abs(velocityX) < maxLateralSpeed)) &&  (Math.abs(lateralDistance)  > 2.4) ) {
- //       const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
- //       const scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
- //       accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
- //   } else {
- //       // If velocity exceeds the max speed, stop lateral thrust
- //       accelerationX = 0;
- //   }
 
-    
+
    if (Math.abs(lateralDistance) > 1) {
         scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
        if ( Math.abs(velocityX) < maxLateralSpeed) {
         accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
        } else {
-           accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3 
+           accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
        }
     } else {
         accelerationX = 0; // Stop lateral movement when close enough
     }
-
-    
-
-//    // lateral thrust scaling algorithm. works about 75%
-//    if (Math.abs(lateralDistance) > 50 && landerY > canvas.height + 400) {
-//        let maxLateralThrust = 0.17; // Cap the lateral thrust
-//        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
-//     }
-//    if (Math.abs(lateralDistance) > 32 && landerY > canvas.height + 200) {
-//        let maxLateralThrust = 0.15; // Cap the lateral thrust
-//        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
-//     }
-//
-//    if (Math.abs(lateralDistance) > 32 && landerY < canvas.height + 100) {
-//        let maxLateralThrust = 0.13; // Cap the lateral thrust
-//        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
-//     }
-//
-//    
-//    // best landing spot is not too far
-//    if (Math.abs(lateralDistance) < 32) {
-//        let maxLateralThrust = 0.10; // Cap the lateral thrust
-//        accelerationX = Math.min(maxLateralThrust, lateralSpeedFactor) * Math.sign(lateralDistance);
-//    }
-//
-//    if (Math.abs(lateralDistance) < 5) {
-//        accelerationX = 0; // Stop lateral movement when close enough
-//     }
-
 
 
     // **Apply Proportional Vertical Thrust**
@@ -476,7 +435,7 @@ function autoland() {
                if (velocityY > 1.0) {
                    accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
                    isThrusting = true;
-               } else if (velocityY < 0.4) { 
+               } else if (velocityY < 0.4) {
                    accelerationY = -0.1 * GRAVITY;
                    isThrusting = true;
                } else if (velocityY < 0.2) {
@@ -498,12 +457,12 @@ function autoland() {
            velocityX = 0;
            accelerationX = 0;
            isThrusting = false;
-           hasTouchedDown = true;
+           hasTouchedDown = true
            checkLanding(true); // Check if landing is successful
        }
 
  }
-    
+
 
 
 function checkLanding(hasTouchedDown) {
@@ -584,7 +543,7 @@ function checkLanding(hasTouchedDown) {
                   const crossSize = 20; // Size of the cross
                   const crossX = bestLandingSpot; // The x-position of the landing spot
                   const crossY = canvas.height - 35; // Near the ground level of the moon
-          
+
                   // Draw vertical line of the cross
                   ctx.strokeStyle = 'red';
                   ctx.lineWidth = 3;
@@ -592,7 +551,7 @@ function checkLanding(hasTouchedDown) {
                   ctx.moveTo(crossX, crossY - crossSize);
                   ctx.lineTo(crossX, crossY + crossSize);
                   ctx.stroke();
-          
+
                   // Draw horizontal line of the cross
                   ctx.beginPath();
                   ctx.moveTo(crossX - crossSize, crossY);
@@ -638,7 +597,7 @@ function createAutolandButton() {
         function gameLoop(currentTime) {
     		// Calculate the altitude (distance from the bottom of the canvas)
             const altitude = canvas.height - landerY - 55; // Lander height from the bottom
-            
+
             // Update the stats in the HTML
             document.getElementById('altitude').textContent = altitude.toFixed(2);
             document.getElementById('verticalSpeed').textContent = velocityY.toFixed(2);
@@ -661,7 +620,7 @@ function createAutolandButton() {
 
             if (!hasLanded && !isCrashed) {
                 if (autolandActivated) {
-                   
+
                     autoland();
 
                 }
@@ -683,7 +642,7 @@ function createAutolandButton() {
                 velocityY += accelerationY * deltaTime;
                 landerY += velocityY * deltaTime * 100;
                 landerX += velocityX * deltaTime * 100;
-               
+
                 oldVelocityY =  velocityY; // to print stats at the end
                 oldVelocityX =  velocityX;
 
@@ -786,6 +745,7 @@ function createAutolandButton() {
         });
 
         initializeGame();
+
     </script>
 </body>
 </html>
