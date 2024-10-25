@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.2.1</div>
+        <div>Version: 2.2.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -102,6 +102,8 @@
         astronautImg.src = 'astronaut.svg';
         const mcdonaldImg = new Image();
         mcdonaldImg.src = 'mcdonald.svg';
+        const roverImg = new Image();
+        roverImg.src = 'rover.svg';
 
         // Sounds
         const rocketSound = new Audio('rocket.mp3');
@@ -112,6 +114,7 @@
         let isPaused = false;
 
         // Global variables
+        let mcdonaldShown = false; // so we can have motivational msg only when arches shown
         const landerWidth = 50;
         const landerHeight = 50;
         const commanderOrbitSpeed = 0.0001;
@@ -207,7 +210,7 @@
         }
 
         function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
-        
+           
             const astronautWidth = landerWidth / 2; // Astronaut width is 1/3 of lander width
             const astronautHeight = landerHeight / 2; // Astronaut height is 1/3 of lander height
             // Initial position: to the right of the lander
@@ -217,6 +220,7 @@
         
             // Check if the right side position is safe
             if (astronautX + astronautWidth <= canvas.width && isSafeLanding(astronautX, astronautWidth)) {
+                mcdonaldShown = true;
                 // Right side is safe, proceed to draw
             } else {
                 // Right side is not safe, try left side
@@ -224,9 +228,11 @@
         
                 // Check if the left side position is safe
                 if (astronautX >= 0 && isSafeLanding(astronautX, astronautWidth)) {
+                    mcdonaldShown = true;
                     // Left side is safe, proceed to draw
                 } else {
-                    console.log("No suitable position for mcdonald found.");
+                     mcdonaldShown = false;
+                    //console.log("No suitable position for mcdonald found.");
                     return; // Exit if no valid position is found
                 }
             }
@@ -234,6 +240,7 @@
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
             ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3, astronautHeight * 3);
+            ctx.drawImage(roverImg, mcdonaldX + 84, astronautY - 17 , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
@@ -300,7 +307,10 @@
                 ctx.fillStyle = "#FFCC00"; // Green color for successful landing
                 ctx.textAlign = "center";
                 ctx.font = "17px Arial"; // for stats smaller font
+                if (mcdonaldShown) {
                 ctx.fillText("Taste the new lunar burgher now!", canvas.width /2, 210);
+                }
+                mcdonaldShown = false; // reset immediately
 
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
