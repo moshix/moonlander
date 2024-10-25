@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.0</div>
+        <div>Version: 2.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -70,6 +70,8 @@
         // v 1.7 Status message after landing
         // v 1.8 Point system
         // v 1.9 clean up stats and crash sound
+        // v 2.0 small improvements
+        // v 2.1 astronaut Bob !
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -95,6 +97,8 @@
         asteroidImg.src = 'asteroid.svg'; // Load the asteroid image
         const crashedImg = new Image();
         crashedImg.src = 'crashed.svg'; // For crash state
+        const astronautImg = new Image();
+        astronautImg.src = 'astronaut.svg';
 
         // Sounds
         const rocketSound = new Audio('rocket.mp3');
@@ -106,6 +110,7 @@
 
         // Global variables
         const landerWidth = 50;
+        const landerHeight = 50;
         const commanderOrbitSpeed = 0.0001;
         const planet1OrbitSpeed = 0.0001;
         const issOrbitSpeed = 0.00005;
@@ -197,6 +202,38 @@
             requestAnimationFrame(gameLoop);
         }
 
+
+        function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
+            const astronautWidth = landerWidth / 2; // Astronaut width is 1/3 of lander width
+            const astronautHeight = landerHeight / 2; // Astronaut height is 1/3 of lander height
+        
+            // Initial position: to the right of the lander
+            let astronautX = landerX + landerWidth + 10;
+            let astronautY = landerY + landerHeight - astronautHeight; // Align bottom with lander
+        
+            // Check if the right side position is safe
+            if (astronautX + astronautWidth <= canvas.width && isSafeLanding(astronautX, astronautWidth)) {
+                // Right side is safe, proceed to draw
+            } else {
+                // Right side is not safe, try left side
+                astronautX = landerX - astronautWidth - 10;
+        
+                // Check if the left side position is safe
+                if (astronautX >= 0 && isSafeLanding(astronautX, astronautWidth)) {
+                    // Left side is safe, proceed to draw
+                } else {
+                    console.log("No suitable position for astronaut found.");
+                    return; // Exit if no valid position is found
+                }
+            }
+        
+            // Draw the astronaut SVG at the calculated position
+            //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
+            ctx.drawImage(astronautImg, astronautX, astronautY, astronautWidth, astronautHeight);
+        }
+
+
+
         function drawStatusLine() {
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
@@ -212,6 +249,7 @@
                 message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
                 ctx.textAlign = "center";
                 ctx.fillText(message, canvas.width /2, 100);
+				drawAstronaut(landerX, landerY, landerWidth, landerHeight);
 
                 // points system
                 ctx.fillStyle = "orange"; // Green color for successful landing
@@ -493,22 +531,18 @@ function checkLanding(hasTouchedDown) {
             drawLander();
             drawAsteroid();
             if (!isMuted) crashSound.play();
-            //statusMessage = 'You crashed! Too high lateral speed!';
-            //showLandingStats();
             return;
         }
 
         // Check if it's landing on a safe flat surface
         if (!isSafeLanding(landerX, landerWidth)) {
-            console.log("Crash due to unsafe landing surface.");
+            //console.log("Crash due to unsafe landing surface.");
             isCrashed = true;
             accelerationX = 0;
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
             if (!isMuted) crashSound.play();
-            //statusMessage = 'You Crashed on a crater!';
-            //showLandingStats();
             return;
         }
 
@@ -517,9 +551,6 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         accelerationX = 0;
-        //statusMessage = 'You Crashed!';
-        //showLandingStats();
-        //landLander(); // Trigger successful landing sequence
     }
 }
 
