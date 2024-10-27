@@ -10,5 +10,6 @@ However, given the excellent animation capabilities of Javascript, this game is 
 
 Play it here: (https://moshix.github.io/moonlander/)  
 
+October 2024, Krakow  
 
-(c) 2024 by moshix
+(c) 2024-2025 by moshix
