@@ -6,7 +6,7 @@ This moon lander can autoland itself if it is within the physical envelope of en
 
 However, given the excellent animation capabilities of Javascript, this game is an homage to the tradition of Lunar Landng gaming, especially for something as vintage as MVS 3.8. 
 
-![Lunar Lander on MVS 3.8 ]([https://moshix.dynu.net/lunarlander.png](https://www.facebook.com/moshixchannel/videos/520967890555202) "lunar lander MVS 3.8")
+![Lunar Lander on MVS 3.8 ]([https://x.com/bmoshix/status/1850488885819617521/photo/1]([https://www.facebook.com/moshixchannel/videos/520967890555202](https://x.com/bmoshix/status/1850488885819617521/photo/1)) "lunar lander MVS 3.8")
 
 Play it here: (https://moshix.github.io/moonlander/)  
 
