@@ -97,6 +97,12 @@
         issImg.src = 'iss.svg';
         const asteroidImg = new Image();
         asteroidImg.src = 'asteroid.svg'; // Load the asteroid image
+
+        asteroidImg.onerror = () => {
+            console.error("Failed to load the asteroid SVG.");
+        };
+
+
         const crashedImg = new Image();
         crashedImg.src = 'crashed.svg'; // For crash state
         const astronautImg = new Image();
@@ -294,6 +300,7 @@
        function drawAsteroid() {
             asteroid = true;
             if (asteroid) {
+                console.log("asteroid x and y: ", asteroid.x, asteroid.y);
                 ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
                 // Move the asteroid diagonally
                 asteroid.x += asteroid.speedX;
@@ -503,7 +510,7 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         drawLander();
-        drawAsteroid();
+        //drawAsteroid();
         if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
         showLandingStats();
@@ -517,7 +524,7 @@ function checkLanding(hasTouchedDown) {
             isThrusting = false;
             bestLandingSpot = false;
             drawLander();
-            drawAsteroid();
+            //drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -530,7 +537,7 @@ function checkLanding(hasTouchedDown) {
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
-            drawAsteroid();
+            //drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -696,7 +703,7 @@ function createAutolandButton() {
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
-            drawAsteroid(currentTime);
+            //drawAsteroid(currentTime);
 
             displayMode();
 
