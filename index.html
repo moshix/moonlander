@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.2.2</div>
+        <div>Version: 2.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -73,6 +73,7 @@
         // v 2.0 small improvements
         // v 2.1 astronaut Bob !
         // v 2.2 McDonalds is now on the moon! lunarMac special: $519
+        // v 2.3 remove cruft and asteroid work
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -160,7 +161,7 @@
         CRATER_COUNT = 2; // fewer craters on mobile
     }
 };
-
+        createAsteroid();
 
         function initializeGame() {
             LandingMode = "Manual Mode";
@@ -187,7 +188,7 @@
             asteroid = null; // Reset the asteroid
             nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
             asteroidStartTime = 0;
-            createAsteroid();
+           // createAsteroid();
 
             // Random position for earth
             earthX = Math.random() * (canvas.width - 100);
@@ -272,72 +273,10 @@
             ctx.drawImage(astronautImg, astronautX, astronautY, astronautWidth, astronautHeight);
         }
 
-        function drawStatusLine() {
-            ctx.font = "34px Arial"; // Set font size and type
-            oldVelocityXF = Number(oldVelocityX).toFixed(2);
-            oldVelocityYF = Number(oldVelocityY).toFixed(2);
-
-            if (hasLanded && !isCrashed) {
-                points = fuel - ( (oldVelocityX * 10) + (oldVelocityY * 10));
-                pointsF = Number(points).toFixed(0); // make integer
-                ctx.fillStyle = "green"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.fillText("Landed", canvas.width /2, 80);
-                ctx.font = "20px Arial"; // for stats smaller font
-                message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
-                ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 100);
-				drawAstronaut(landerX, landerY, landerWidth, landerHeight);
-				drawMcdonald(landerX, landerY, landerWidth, landerHeight);
-
-                // points system
-                ctx.fillStyle = "orange"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "25px Arial"; // for stats smaller font
-                message = "Points:  " + pointsF;
-                ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 135);
-                // Resume to restart message
-                ctx.fillStyle = "white"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "28px Arial"; // for stats smaller font
-                ctx.fillText("Press R to restart", canvas.width /2, 170);
-
-                // motivational message
-                ctx.fillStyle = "#FFCC00"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "17px Arial"; // for stats smaller font
-                if (mcdonaldShown) {
-                ctx.fillText("Taste the new lunar burgher now!", canvas.width /2, 210);
-                }
-                mcdonaldShown = false; // reset immediately
-
-            } else if (isCrashed) {
-                ctx.fillStyle = "red"; // Red color for crash
-                ctx.textAlign = "center";
-                ctx.fillText("Crashed", canvas.width /2 , 80);
-                ctx.font = "20px Arial"; // for stats smaller font
-                message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
-                ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 100);
-                // points system
-                ctx.fillStyle = "orange"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "25px Arial"; // for stats smaller font
-                message = "Points: 0";
-                ctx.textAlign = "center";
-                ctx.fillText(message, canvas.width /2, 135);
-                // Resume to restart message
-                ctx.fillStyle = "white"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "28px Arial"; // for stats smaller font
-                ctx.fillText("Press R to restart", canvas.width /2, 170);
-            }
-        }
-
 
         // Asteroid logic
         function createAsteroid() {
+        //console.log("entered createAsteroid function");
         const direction = Math.random() < 0.5 ? 'left' : 'right'; // Asteroid comes from left or right
         const startY = Math.random() * (canvas.height - 200); // Random starting altitude within the canvas
 
@@ -376,11 +315,12 @@
                     // Lander crashes due to asteroid collision
                     isCrashed = true;
                     asteroid = null;
-                    statusMessage = 'You Crashed!';
-                    showLandingStats();
+                    //statusMessage = 'You Crashed!';
+                    //showLandingStats();
                 }
             }
         }
+
         function generateCraters() {
             for (let i = 0; i < CRATER_COUNT; i++) {
                 const width = Math.random() * 50 + 50;
@@ -590,6 +530,7 @@ function checkLanding(hasTouchedDown) {
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
+            drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -688,6 +629,7 @@ function createAutolandButton() {
             if (!lastTime) lastTime = currentTime;
             const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
+            asteroid = true;
 
             if (isPaused) {
                 ctx.fillStyle = 'white';
@@ -754,11 +696,11 @@ function createAutolandButton() {
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
-            //drawAsteroid(currentTime);
+            drawAsteroid(currentTime);
 
             displayMode();
 
-			drawStatusLine();
+			//drawStatusLine();
 
             requestAnimationFrame(gameLoop);
         }
