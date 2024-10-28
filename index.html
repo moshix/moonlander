@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.4</div>
+        <div>Version: 2.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -46,7 +46,7 @@
         <div>P:          Pause/Unpause</div>
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
-        <div>______________________ </div>
+        <div>________________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
     <script>
@@ -77,6 +77,8 @@
         // v 2.2 McDonalds is now on the moon! lunarMac special: $519
         // v 2.3 copyright notice
         // v 2.3 cancel animation frame on restart (important!)
+        // v 2.4 remove old code
+        // v 2.5 asteroid time-based
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -120,8 +122,6 @@
         // Global variables
         let alTime = 0 ; // for asteroid time animation
         const asteroidSpeed = 40; // pixels per second 
-
-        let gameLoopRunning = false;
         let animationID; 
         let mcdonaldShown = false; // so we can have motivational msg only when arches shown
         const landerWidth = 50;
@@ -165,11 +165,11 @@
         let nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
 
 		window.onload = function() {
-    if (isMobile()) {
-        createAutolandButton(); // Show the autoland button if on a mobile device
-        CRATER_COUNT = 5; // fewer craters on mobile
-    }
-};
+         if (isMobile()) {
+            createAutolandButton(); // Show the autoland button if on a mobile device
+         CRATER_COUNT = 5; // fewer craters on mobile
+             }
+        };
 
 
         function initializeGame() {
@@ -357,7 +357,7 @@
         x: direction === 'left' ? 0 : canvas.width, // Start from the left or right
         y: startY,
         speedX: direction === 'left' ? 2 : -2, // Move diagonally
-        speedY: 0.1, // Always moves downward
+        speedY: 0.5, // Always moves downward
         width: 50,
         height: 50,
         direction
@@ -478,6 +478,7 @@
         function drawEarth() {
             ctx.drawImage(earthImg, earthX, earthY, 100, 100);
         }
+
 
         function drawCommanderModule(currentTime) {
             const orbitRadius = canvas.width / 3;
@@ -612,7 +613,6 @@ function checkLanding(hasTouchedDown) {
         //drawAsteroid(); // we only show asteroid once at game load
         if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
-        showLandingStats();
             return;
         }
 
@@ -630,7 +630,6 @@ function checkLanding(hasTouchedDown) {
 
         // Check if it's landing on a safe flat surface
         if (!isSafeLanding(landerX, landerWidth)) {
-            //console.log("Crash due to unsafe landing surface.");
             isCrashed = true;
             accelerationX = 0;
             bestLandingSpot = false;
@@ -648,19 +647,6 @@ function checkLanding(hasTouchedDown) {
         accelerationX = 0;
     }
 }
-
-
-        function showLandingStats() {
-            ctx.fillStyle = 'white';
-            ctx.font = '24px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText(statusMessage, canvas.width / 2, canvas.height / 2 - 200);
-            ctx.font = '18px monospace';
-            ctx.fillText(`Lateral Speed: ${preTouchdownSpeeds.velocityX.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2);
-            ctx.fillText(`Vertical Speed: ${preTouchdownSpeeds.velocityY.toFixed(2)} m/s`, canvas.width / 2, canvas.height / 2 + 30);
-            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
-        }
-
 
           // draw a crossmark where the lander has decided to land
           function drawLandingCross() {
@@ -721,8 +707,6 @@ function createAutolandButton() {
         let lastTime = 0;
         
         function gameLoop(currentTime) {
-//           if (gameLoopRunning) return; // Prevent multiple game loops
-           gameLoopRunning = true; // prevent multiple animation looops
     		// Calculate the altitude (distance from the bottom of the canvas)
             const altitude = canvas.height - landerY - 55; // Lander height from the bottom
 
@@ -800,7 +784,7 @@ function createAutolandButton() {
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
-            //drawAsteroid(currentTime);
+            drawAsteroid(currentTime);
 
             displayMode();
 
