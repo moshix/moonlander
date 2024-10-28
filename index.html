@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.3</div>
+        <div>Version: 2.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -46,7 +46,7 @@
         <div>P:          Pause/Unpause</div>
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
-        <div>                       </div>
+        <div>______________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
     <script>
@@ -76,6 +76,7 @@
         // v 2.1 astronaut Bob !
         // v 2.2 McDonalds is now on the moon! lunarMac special: $519
         // v 2.3 copyright notice
+        // v 2.3 cancel animation frame on restart (important!)
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -117,6 +118,9 @@
         let isPaused = false;
 
         // Global variables
+        let gameLoopRunning = false;
+        let animationID; 
+        let asteroidStop = false; // show asteroid only at first load time
         let mcdonaldShown = false; // so we can have motivational msg only when arches shown
         const landerWidth = 50;
         const landerHeight = 50;
@@ -124,8 +128,9 @@
         const planet1OrbitSpeed = 0.0001;
         const issOrbitSpeed = 0.00005;
         let    CRATER_COUNT = 8;
-        const asteroidIntervalMin = 5000; // Minimum time between asteroid appearances (ms)
-        const asteroidIntervalMax = 15000; // Maximum time between asteroid appearances (ms)
+        const asteroidIntervalMin = 3000; // Minimum time for asteroid appearances
+        const asteroidIntervalMax = 4000; // Maximum time for asteroid appearances
+
         const GRAVITY = 1.62; // Moon gravity in m/s²
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
         const SIDE_THRUST = 4000; // Apollo lander side thrusters in N
@@ -160,12 +165,13 @@
 		window.onload = function() {
     if (isMobile()) {
         createAutolandButton(); // Show the autoland button if on a mobile device
-        CRATER_COUNT = 3; // fewer craters on mobile
+        CRATER_COUNT = 5; // fewer craters on mobile
     }
 };
 
 
         function initializeGame() {
+           if (animationID) cancelAnimationFrame(animationID);
             LandingMode = "Manual Mode";
             bestLandingSpot = false;
             landerY = 50;
@@ -187,10 +193,12 @@
             score = 0;
             isPaused = false;
             landingMode = 'Manual Land';
-            asteroid = null; // Reset the asteroid
             nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
             asteroidStartTime = 0;
-            createAsteroid();
+            asteroid = null;
+            if (asteroidStop = true) {
+              createAsteroid();
+            }
 
             // Random position for earth
             earthX = Math.random() * (canvas.width - 100);
@@ -209,7 +217,7 @@
                 stars.push({ x, y, size });
             }
 
-            requestAnimationFrame(gameLoop);
+            animationID = requestAnimationFrame(gameLoop);
         }
 
         function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
@@ -279,6 +287,7 @@
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
             oldVelocityYF = Number(oldVelocityY).toFixed(2);
+            let asteroidStop = true; // dont' show asteroid anymore
 
             if (hasLanded && !isCrashed) {
                 points = fuel - ( (oldVelocityX * 10) + (oldVelocityY * 10));
@@ -309,11 +318,12 @@
                 // motivational message
                 ctx.fillStyle = "#FFCC00"; // Green color for successful landing
                 ctx.textAlign = "center";
-                ctx.font = "32px Arial"; // for stats smaller font
+                ctx.font = "37px Arial"; // for stats smaller font
                 if (mcdonaldShown) {
                 ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
                 }
                 mcdonaldShown = false; // reset immediately
+                if (animationID) ancelAnimationFrame(animationID);
 
             } else if (isCrashed) {
                 ctx.fillStyle = "red"; // Red color for crash
@@ -335,20 +345,22 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
+                if (animationID) ancelAnimationFrame(animationID);
             }
         }
 
 
         // Asteroid logic
         function createAsteroid() {
+        asteroid = null;
         const direction = Math.random() < 0.5 ? 'left' : 'right'; // Asteroid comes from left or right
-        const startY = Math.random() * (canvas.height - 200); // Random starting altitude within the canvas
+        const startY = Math.random() * (canvas.height - 220); // Random starting altitude within the canvas
 
         asteroid = {
         x: direction === 'left' ? 0 : canvas.width, // Start from the left or right
         y: startY,
         speedX: direction === 'left' ? 2 : -2, // Move diagonally
-        speedY: 1, // Always moves downward
+        speedY: 0.1, // Always moves downward
         width: 50,
         height: 50,
         direction
@@ -356,8 +368,7 @@
         }
 
        function drawAsteroid() {
-            asteroid = true;
-            if (asteroid) {
+             if (asteroid) {
                 ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
                 // Move the asteroid diagonally
                 asteroid.x += asteroid.speedX;
@@ -365,7 +376,7 @@
 
                 // Check if the asteroid goes off-screen
                 if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
-                    asteroid = null; // Remove asteroid when it goes off-screen
+                    //asteroid = null; // Remove asteroid when it goes off-screen
                     nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
                 }
 
@@ -378,12 +389,13 @@
                 ) {
                     // Lander crashes due to asteroid collision
                     isCrashed = true;
-                    asteroid = null;
-                    statusMessage = 'You Crashed!';
-                    showLandingStats();
+             //       asteroid = null;
                 }
-            }
+             }
         }
+
+
+
         function generateCraters() {
             for (let i = 0; i < CRATER_COUNT; i++) {
                 const width = Math.random() * 50 + 50;
@@ -566,7 +578,9 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         drawLander();
-        //drawAsteroid();
+        if (asteroidStop) {
+           drawAsteroid(); // we only show asteroid once at game load
+        }
         if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
         showLandingStats();
@@ -580,7 +594,7 @@ function checkLanding(hasTouchedDown) {
             isThrusting = false;
             bestLandingSpot = false;
             drawLander();
-            //drawAsteroid();
+            drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -593,6 +607,7 @@ function checkLanding(hasTouchedDown) {
             bestLandingSpot = false;
             isThrusting = false;
             drawLander();
+            drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -677,6 +692,8 @@ function createAutolandButton() {
         let lastTime = 0;
         
         function gameLoop(currentTime) {
+//           if (gameLoopRunning) return; // Prevent multiple game loops
+           gameLoopRunning = true; // prevent multiple animation looops
     		// Calculate the altitude (distance from the bottom of the canvas)
             const altitude = canvas.height - landerY - 55; // Lander height from the bottom
 
@@ -742,9 +759,6 @@ function createAutolandButton() {
                 if (landerX > canvas.width - 50) landerX = canvas.width - 50;
             }
 
-             //if (hasLanded) {
-             //  showLandingStats();
-             //}
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!hasLanded) {
