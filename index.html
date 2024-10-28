@@ -118,9 +118,11 @@
         let isPaused = false;
 
         // Global variables
+        let alTime = 0 ; // for asteroid time animation
+        const asteroidSpeed = 40; // pixels per second 
+
         let gameLoopRunning = false;
         let animationID; 
-        let asteroidStop = false; // show asteroid only at first load time
         let mcdonaldShown = false; // so we can have motivational msg only when arches shown
         const landerWidth = 50;
         const landerHeight = 50;
@@ -196,9 +198,7 @@
             nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
             asteroidStartTime = 0;
             asteroid = null;
-            if (asteroidStop = true) {
-              createAsteroid();
-            }
+            createAsteroid();
 
             // Random position for earth
             earthX = Math.random() * (canvas.width - 100);
@@ -287,7 +287,6 @@
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
             oldVelocityYF = Number(oldVelocityY).toFixed(2);
-            let asteroidStop = true; // dont' show asteroid anymore
 
             if (hasLanded && !isCrashed) {
                 points = fuel - ( (oldVelocityX * 10) + (oldVelocityY * 10));
@@ -344,7 +343,6 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
-                if (animationID) ancelAnimationFrame(animationID);
             }
         }
 
@@ -366,32 +364,66 @@
          };
         }
 
-       function drawAsteroid() {
-             if (asteroid) {
-                ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
-                // Move the asteroid diagonally
-                asteroid.x += asteroid.speedX;
-                asteroid.y += asteroid.speedY;
 
-                // Check if the asteroid goes off-screen
-                if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
-                    //asteroid = null; // Remove asteroid when it goes off-screen
-                    nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
-                }
+      function drawAsteroid(timestamp) {
+          if (!alTime) alTime = timestamp;
+          const adeltaTime = (timestamp - alTime) / 1000; // convert to seconds
+          alTime = timestamp;
+      
+          if (asteroid) {
+              ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+      
+              // Move the asteroid based on time elapsed
+              asteroid.x += asteroid.speedX * asteroidSpeed * adeltaTime;
+              asteroid.y += asteroid.speedY * asteroidSpeed * adeltaTime;
+      
+              // Check if the asteroid goes off-screen
+              if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
+                  nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+                  // Optionally reset asteroid position here
+              }
+      
+              // Check for collision with the lander
+              if (
+                  asteroid.x < landerX + 50 &&
+                  asteroid.x + asteroid.width > landerX &&
+                  asteroid.y < landerY + 50 &&
+                  asteroid.y + asteroid.height > landerY
+              ) {
+                  isCrashed = true;
+              }
+          }
+        // Request the next animation frame, passing the current timestamp
+       requestAnimationFrame(drawAsteroid);
+   }
 
-                // Check for collision with the lander
-                if (
-                    asteroid.x < landerX + 50 &&
-                    asteroid.x + asteroid.width > landerX &&
-                    asteroid.y < landerY + 50 &&
-                    asteroid.y + asteroid.height > landerY
-                ) {
-                    // Lander crashes due to asteroid collision
-                    isCrashed = true;
-             //       asteroid = null;
-                }
-             }
-        }
+
+//       function drawAsteroid() {
+//             if (asteroid) {
+//                ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+//                // Move the asteroid diagonally
+//                asteroid.x += asteroid.speedX;
+//                asteroid.y += asteroid.speedY;
+//
+//                // Check if the asteroid goes off-screen
+//                if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
+//                    //asteroid = null; // Remove asteroid when it goes off-screen
+//                    nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+//                }
+//
+//                // Check for collision with the lander
+//                if (
+//                    asteroid.x < landerX + 50 &&
+//                    asteroid.x + asteroid.width > landerX &&
+//                    asteroid.y < landerY + 50 &&
+//                    asteroid.y + asteroid.height > landerY
+//                ) {
+//                    // Lander crashes due to asteroid collision
+//                    isCrashed = true;
+//             //       asteroid = null;
+//                }
+//             }
+//        }
 
 
 
@@ -577,9 +609,7 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         drawLander();
-        if (asteroidStop) {
-           drawAsteroid(); // we only show asteroid once at game load
-        }
+        //drawAsteroid(); // we only show asteroid once at game load
         if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
         showLandingStats();
@@ -593,7 +623,7 @@ function checkLanding(hasTouchedDown) {
             isThrusting = false;
             bestLandingSpot = false;
             drawLander();
-            drawAsteroid();
+         //   drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -770,7 +800,7 @@ function createAutolandButton() {
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
-            drawAsteroid(currentTime);
+            //drawAsteroid(currentTime);
 
             displayMode();
 
