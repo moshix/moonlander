@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.1</div>
+        <div>Version: 2.7.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -471,6 +471,13 @@
         }
 
         function drawLander() {
+            if (isMuted) {
+                ctx.fillStyle = "white"; 
+                ctx.textAlign = "right";
+                ctx.fillText("Muted", canvas.width -47, 80);
+                ctx.font = "7px Arial"; // for stats smaller font
+             }
+
             if (isCrashed) {
                 ctx.drawImage(crashedImg, landerX, landerY, 50, 50);
             } else {
@@ -844,7 +851,7 @@ function createAutolandButton() {
                     break;
                 case 'KeyM':
                     isMuted = !isMuted;
-                    landingMode = isMuted ? 'Muted' : 'Manual Land';
+                    //landingMode = isMuted ? 'Muted' : 'Manual Land';
                     rocketSound.muted = isMuted;
                     crashSound.muted = isMuted;
                     break;
