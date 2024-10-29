@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.5.1</div>
+        <div>Version: 2.6</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -46,6 +46,7 @@
         <div>P:          Pause/Unpause</div>
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
+        <div>S:          Switch to manual</div>
         <div>________________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
@@ -79,6 +80,7 @@
         // v 2.3 cancel animation frame on restart (important!)
         // v 2.4 remove old code
         // v 2.5 asteroid time-based
+        // v 2.6 switch to autoland and back to manual with S key
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -120,6 +122,7 @@
         let isPaused = false;
 
         // Global variables
+        forceManual = false; // force manual during autoland
         let alTime = 0 ; // for asteroid time animation
         const asteroidSpeed = 40; // pixels per second 
         let animationID; 
@@ -198,6 +201,7 @@
             nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
             asteroidStartTime = 0;
             asteroid = null;
+            forceManual = false; // reset foce manual
             createAsteroid();
 
             // Random position for earth
@@ -504,8 +508,14 @@
 
         function autoland() {
             autolandActivated = true;
+
             landingMode = 'Autoland Mode';
-        
+
+            if (forceManual) {
+                 //console.log(forceManual);
+                 landingMode = 'Switched to manual';
+                 return;
+            }
                 // calculate the largest flat landing area
                     let largestFlatAreaStart = 0;
                     let largestFlatWidth = 0;
@@ -820,6 +830,7 @@ function createAutolandButton() {
                     if (!hasLanded && !isCrashed) {
                         autolandActivated = true;
                         landingMode = 'Autoland Mode';
+                        forceManual = false;
                     }
                     break;
                 case 'KeyR':
@@ -831,6 +842,9 @@ function createAutolandButton() {
                     rocketSound.muted = isMuted;
                     crashSound.muted = isMuted;
                     break;
+                case 'KeyS':
+                    forceManual = !forceManual;
+                    break;    
                 case 'KeyP':
                     isPaused = !isPaused;
                     if (isPaused) {
