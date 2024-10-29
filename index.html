@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.5</div>
+        <div>Version: 2.5.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -250,7 +250,7 @@
         
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
-            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3, astronautHeight * 3);
+            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3.2, astronautHeight * 6);
             ctx.drawImage(roverImg, mcdonaldX + 84, astronautY - 19 , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
@@ -357,7 +357,7 @@
         x: direction === 'left' ? 0 : canvas.width, // Start from the left or right
         y: startY,
         speedX: direction === 'left' ? 2 : -2, // Move diagonally
-        speedY: 0.5, // Always moves downward
+        speedY: 0.6, // Always moves downward
         width: 50,
         height: 50,
         direction
