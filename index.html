@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.6</div>
+        <div>Version: 2.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -81,6 +81,7 @@
         // v 2.4 remove old code
         // v 2.5 asteroid time-based
         // v 2.6 switch to autoland and back to manual with S key
+        // v 2.7 randomly play eagle has landed when properly landed
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -116,6 +117,7 @@
         // Sounds
         const rocketSound = new Audio('rocket.mp3');
         const crashSound = new Audio('crash.mp3');
+        const landedSound = new Audio('eaglelanded.mp3')
         crashSound.loop = false;
         let isMuted = false;
         let crashPlayed = false;
@@ -655,6 +657,10 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         accelerationX = 0;
+        // play eagle has landed sound
+        if (!isMuted) {
+         if (Math.floor(Math.random() * 4) + 1 === 1) landedSound.play();  
+        }
     }
 }
 
