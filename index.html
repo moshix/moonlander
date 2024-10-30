@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.2</div>
+        <div>Version: 2.7.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -404,34 +404,6 @@
    }
 
 
-//       function drawAsteroid() {
-//             if (asteroid) {
-//                ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
-//                // Move the asteroid diagonally
-//                asteroid.x += asteroid.speedX;
-//                asteroid.y += asteroid.speedY;
-//
-//                // Check if the asteroid goes off-screen
-//                if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
-//                    //asteroid = null; // Remove asteroid when it goes off-screen
-//                    nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
-//                }
-//
-//                // Check for collision with the lander
-//                if (
-//                    asteroid.x < landerX + 50 &&
-//                    asteroid.x + asteroid.width > landerX &&
-//                    asteroid.y < landerY + 50 &&
-//                    asteroid.y + asteroid.height > landerY
-//                ) {
-//                    // Lander crashes due to asteroid collision
-//                    isCrashed = true;
-//             //       asteroid = null;
-//                }
-//             }
-//        }
-
-
 
         function generateCraters() {
             for (let i = 0; i < CRATER_COUNT; i++) {
@@ -475,7 +447,7 @@
                 ctx.fillStyle = "white"; 
                 ctx.textAlign = "right";
                 ctx.fillText("Muted", canvas.width -47, 80);
-                ctx.font = "7px Arial"; // for stats smaller font
+                ctx.font = "10px Arial"; 
              }
 
             if (isCrashed) {
@@ -605,7 +577,6 @@
                } else if (landerY >= canvas.height - 55) { // On the ground
                    accelerationY = 0;
                    oldVelocityX = velocityX;
-                   //velocityX = 0;
                    accelerationX = 0;
                    isThrusting = false;
                    hasTouchedDown = true
@@ -617,11 +588,10 @@
 
 
 function checkLanding(hasTouchedDown) {
-    hasTouchedDown = true;
     if (hasTouchedDown) {
         // Check if lander is landing within safe speed limits
         const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
-        const safeLateralSpeed = 1.8;  // Safe lateral landing speed (in meters/sec)
+        const safeLateralSpeed = 1.0;  // Safe lateral landing speed (in meters/sec)
 
         // Check vertical speed
         if (Math.abs(velocityY) > safeVerticalSpeed) {
@@ -629,7 +599,6 @@ function checkLanding(hasTouchedDown) {
         isThrusting = false;
         bestLandingSpot = false;
         drawLander();
-        //drawAsteroid(); // we only show asteroid once at game load
         if (!isMuted) crashSound.play();
         statusMessage = 'You crashed due to high vertical speed!';
             return;
@@ -642,7 +611,6 @@ function checkLanding(hasTouchedDown) {
             isThrusting = false;
             bestLandingSpot = false;
             drawLander();
-         //   drawAsteroid();
             if (!isMuted) crashSound.play();
             return;
         }
@@ -783,10 +751,9 @@ function createAutolandButton() {
 
                 if (landerY >= canvas.height - 54) {
                     landerY = canvas.height - 50;
-                    oldVelocityY =  velocityY; // to print stats at the end
-                    velocityY = 0;
+                    oldVelocityY =  velocityY; 
                     oldVelocityX =  velocityX;
-                    velocityX = 0;
+                    //velocityX = 0;
                     hasLanded = true;
                     checkLanding(true);
                 }
