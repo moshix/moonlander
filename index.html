@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.3</div>
+        <div>Version: 2.7.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -145,7 +145,7 @@
         let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, statusMessage, earthX, earthY;
         let commanderX = 0;
         let commanderY = 50;
-        let planet1X = 0, planet1Y = 100;
+        let planet1X = 0, planet1Y = 800;
         let issX = 1, issY = 550;
         let planet1OrbitRadius = 050;
         let issOrbitRadius = 400;
@@ -204,7 +204,7 @@
             asteroidStartTime = 0;
             asteroid = null;
             forceManual = false; // reset foce manual
-            createAsteroid();
+            //createAsteroid();
 
             // Random position for earth
             earthX = Math.random() * (canvas.width - 100);
@@ -474,8 +474,8 @@
 
         function drawPlanet1(currentTime) {
             const orbitRadius = planet1OrbitRadius;
-            planet1X = canvas.width / 2 + Math.cos(-currentTime * planet1OrbitSpeed) * orbitRadius;
-            planet1Y = 100 + Math.sin(-currentTime * planet1OrbitSpeed) * 30;
+            planet1X = canvas.width / 3 + Math.cos(-currentTime * planet1OrbitSpeed) * orbitRadius;
+            planet1Y = 290 + Math.sin(-currentTime * planet1OrbitSpeed) * 30;
             ctx.drawImage(planet1Img, planet1X, planet1Y, 40, 40);
         }
 
@@ -847,7 +847,7 @@ function createAutolandButton() {
                 accelerationX = 0;
             }
         });
-
+       
         initializeGame();
 
     </script>
