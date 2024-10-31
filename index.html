@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.6</div>
+        <div>Version: 2.7.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -634,7 +634,7 @@ function checkLanding(hasTouchedDown) {
         accelerationX = 0;
         // play eagle has landed sound
         if (!isMuted) {
-         if (Math.floor(Math.random() * 4) + 1 === 1) landedSound.play();  
+         if (Math.floor(Math.random() * 6) + 1 === 1) landedSound.play();  
         }
     }
 }
