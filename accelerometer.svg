@@ -1,25 +1,18 @@
-<svg id="verticalSpeedIndicator" width="200" height="400" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="400" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
   <!-- Background of the indicator -->
   <rect x="0" y="0" width="200" height="400" fill="#333" rx="15" ry="15" />
 
   <!-- Outer border -->
   <rect x="5" y="5" width="190" height="390" fill="none" stroke="#999" stroke-width="2" rx="10" ry="10" />
 
-  <!-- Scale line -->
-  <line x1="100" y1="50" x2="100" y2="350" stroke="#ccc" stroke-width="2" />
-
-  <!-- Scale labels -->
-  <text x="110" y="60" fill="#eee" font-family="Arial" font-size="14">+5</text>
-  <text x="110" y="120" fill="#eee" font-family="Arial" font-size="14">+4</text>
-  <text x="110" y="180" fill="#eee" font-family="Arial" font-size="14">+3</text>
-  <text x="110" y="240" fill="#eee" font-family="Arial" font-size="14">+2</text>
-  <text x="110" y="300" fill="#eee" font-family="Arial" font-size="14">+1</text>
-  <text x="110" y="360" fill="#eee" font-family="Arial" font-size="14">0</text>
-  <text x="110" y="420" fill="#eee" font-family="Arial" font-size="14">-1</text>
-  <text x="110" y="480" fill="#eee" font-family="Arial" font-size="14">-2</text>
-  <text x="110" y="540" fill="#eee" font-family="Arial" font-size="14">-3</text>
-  <text x="110" y="600" fill="#eee" font-family="Arial" font-size="14">-4</text>
-  <text x="110" y="660" fill="#eee" font-family="Arial" font-size="14">-5</text>
+  <!-- Scale -->
+  <line x1="100" y1="50" x2="100" y2="350" stroke="#ccc" stroke-width="1" />
+  <text x="80" y="60" fill="#eee" font-family="Arial" font-size="14">+5</text>
+  <text x="80" y="120" fill="#eee" font-family="Arial" font-size="14">+4</text>
+  <text x="80" y="180" fill="#eee" font-family="Arial" font-size="14">+3</text>
+  <text x="80" y="240" fill="#eee" font-family="Arial" font-size="14">+2</text>
+  <text x="80" y="300" fill="#eee" font-family="Arial" font-size="14">+1</text>
+  <text x="80" y="360" fill="#eee" font-family="Arial" font-size="14">0</text>
 
   <!-- Tick marks -->
   <line x1="90" y1="50" x2="110" y2="50" stroke="#eee" stroke-width="2" />
@@ -29,9 +22,12 @@
   <line x1="90" y1="290" x2="110" y2="290" stroke="#eee" stroke-width="2" />
   <line x1="90" y1="350" x2="110" y2="350" stroke="#eee" stroke-width="2" />
 
+  <!-- Needle (for dynamic positioning, apply rotation with JavaScript) -->
+  <line id="needle" x1="100" y1="200" x2="100" y2="60" stroke="red" stroke-width="3" />
+
+  <!-- Center of the needle -->
+  <circle cx="100" cy="200" r="5" fill="#eee" />
+
   <!-- Bottom text -->
   <text x="50" y="380" fill="#eee" font-family="Arial" font-size="16">VERT SPEED</text>
-
-  <!-- Placeholder for Red Dot (JavaScript will place it here) -->
-  <!-- Ensure this SVG is saved as `accelerometer.svg` and used with JavaScript to place the red dot accordingly -->
 </svg>
