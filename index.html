@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.9.4</div>
+        <div>Version: 2.7.9.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -228,8 +228,8 @@
 
         function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
            
-            const astronautWidth = landerWidth / 2; // Astronaut width is 1/3 of lander width
-            const astronautHeight = landerHeight / 2; // Astronaut height is 1/3 of lander height
+            const astronautWidth = landerWidth / 3; // Astronaut width is 1/3 of lander width
+            const astronautHeight = landerHeight / 3; // Astronaut height is 1/3 of lander height
             // Initial position: to the right of the lander
             let astronautX = landerX + landerWidth + 10 + 20; // after astronaut
             let astronautY = landerY + landerHeight - astronautHeight; // Align bottom with lander
