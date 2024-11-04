@@ -295,7 +295,7 @@
             oldVelocityYF = Number(oldVelocityY).toFixed(2);
 
             if (hasLanded && !isCrashed) {
-		landerY = canvas.height -10; // put lander on surface
+		landerY = canvas.height -59; // put lander on surface
                 points = fuel - ( (oldVelocityX * 200) + (oldVelocityY * 200));
                 pointsF = Number(points).toFixed(0); // make integer
                 ctx.fillStyle = "green"; // Green color for successful landing
