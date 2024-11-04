@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.9.1</div>
+        <div>Version: 2.7.9.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -453,10 +453,10 @@
             if (isCrashed) {
                 ctx.drawImage(crashedImg, landerX, landerY, 50, 50);
             } else {
-                ctx.drawImage(landerImg, landerX, landerY, 75, 75);
+                ctx.drawImage(landerImg, landerX, landerY, 60, 60);
             }
             if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
-                ctx.drawImage(plumeImg, landerX +15, landerY + 50, 30, 30);
+                ctx.drawImage(plumeImg, landerX +20, landerY + 75, 30, 30);
             }
         }
 
