@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.7.9.8</div>
+        <div>Version: 2.8</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -82,6 +82,7 @@
         // v 2.5 asteroid time-based
         // v 2.6 switch to autoland and back to manual with S key
         // v 2.7 randomly play eagle has landed when properly landed
+	// v 2.8 changed to nicer lander svg, and many small fixes
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -134,7 +135,7 @@
         const commanderOrbitSpeed = 0.0001;
         const planet1OrbitSpeed = 0.0001;
         const issOrbitSpeed = 0.00005;
-        let    CRATER_COUNT = 8;
+        let    CRATER_COUNT = 7;
         const asteroidIntervalMin = 3000; // Minimum time for asteroid appearances
         const asteroidIntervalMax = 4000; // Maximum time for asteroid appearances
 
@@ -169,12 +170,12 @@
         let asteroidStartTime = 0;
         let nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
 
-		window.onload = function() {
-         if (isMobile()) {
-            createAutolandButton(); // Show the autoland button if on a mobile device
-         CRATER_COUNT = 5; // fewer craters on mobile
-             }
-        };
+	 window.onload = function() {
+	         if (isMobile()) {
+	            createAutolandButton(); // Show the autoland button if on a mobile device
+	            CRATER_COUNT = 3; // fewer craters on mobile
+	             }
+          };
 
 
         function initializeGame() {
@@ -491,7 +492,7 @@
         function autoland() {
             autolandActivated = true;
 
-            landingMode = 'Autoland Mode';
+            landingMode = 'Autoland P66';
 
             if (forceManual) {
                  //console.log(forceManual);
