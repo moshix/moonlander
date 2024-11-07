@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.8.1</div>
+        <div>Version: 2.8.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -328,7 +328,8 @@
                 ctx.font = "37px Arial"; // for stats smaller font
                 if (mcdonaldShown) {
                 ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
-                }
+                landingMode = 'Landed';
+		}
                 mcdonaldShown = false; // reset immediately
 
             } else if (isCrashed) {
@@ -351,6 +352,7 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
+		landingMode = '';    
             }
         }
 
