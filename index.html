@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.8.2</div>
+        <div>Version: 2.8.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -125,6 +125,7 @@
         let isPaused = false;
 
         // Global variables
+        showBurger = false; // show burger only once in 1 landings
         forceManual = false; // force manual during autoland
         let alTime = 0 ; // for asteroid time animation
         const asteroidSpeed = 40; // pixels per second 
@@ -180,6 +181,7 @@
 
         function initializeGame() {
            if (animationID) cancelAnimationFrame(animationID);
+            if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
             LandingMode = "Manual Mode";
             bestLandingSpot = false;
             landerY = 50;
@@ -327,9 +329,9 @@
                 ctx.textAlign = "center";
                 ctx.font = "37px Arial"; // for stats smaller font
                 if (mcdonaldShown) {
-                ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
-                landingMode = 'Landed';
-		}
+                  if (showBurger) ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
+                  landingMode = 'Landed';
+		        }
                 mcdonaldShown = false; // reset immediately
 
             } else if (isCrashed) {
@@ -857,3 +859,4 @@ function createAutolandButton() {
     </script>
 </body>
 </html>
+
