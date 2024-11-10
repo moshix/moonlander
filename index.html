@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.9.4</div>
+        <div>Version: 2.9.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -47,7 +47,7 @@
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
         <div>S:          Switch to manual</div>
-        <div>________________________ </div>
+        <div>_______________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
     <script>
@@ -85,6 +85,7 @@
     	// v 2.8 changed to nicer lander svg, and many small fixes
     	// v 2.9 dust particles close to surface
         // v 2.9.4 side thrusters
+        // v. 2.9.5 change moon size randomly to make Restart more obvious
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -156,6 +157,7 @@
         // end sounds loading
 
         // Global variables
+        let earthsize = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
         showBurger = false; // show burger only once in 1 landings
         forceManual = false; // force manual during autoland
         let alTime = 0 ; // for asteroid time animation
@@ -211,9 +213,11 @@
 
 
         function initializeGame() {
+           
            if (animationID) cancelAnimationFrame(animationID);
+         
+
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
-            LandingMode = "Manual Mode";
             bestLandingSpot = false;
             landerY = 50;
             landerX = canvas.width / 2 - 25;
@@ -243,6 +247,7 @@
             //createAsteroid();
 
             // Random position for earth
+             earthsize = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
             earthX = Math.random() * (canvas.width - 100);
             earthY = Math.random() * (canvas.height / 2);
 
@@ -387,7 +392,7 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
-		landingMode = '';    
+		        landingMode = '';    
             }
         }
 
@@ -522,7 +527,8 @@
         }
 
         function drawEarth() {
-            ctx.drawImage(earthImg, earthX, earthY, 70, 70);
+            //console.log('earthsize: ', earthsize); // for debugging...
+            ctx.drawImage(earthImg, earthX, earthY, earthsize, earthsize);
         }
 
 
