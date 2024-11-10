@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.2</div>
+        <div>Version: 3.0.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -579,6 +579,7 @@
                     let largestFlatWidth = 0;
                     let currentFlatStart = null;
                     let currentFlatWidth = 0;
+
         
                     for (let x = 0; x < canvas.width; x += 5) {
                         if (isSafeLanding(x, 50)) { // Safe landing spot
@@ -601,14 +602,14 @@
                         largestFlatWidth = currentFlatWidth;
                     }
         
-                    bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
-                    drawLandingCross();
+                   bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
+
         
         
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.12; // Cap the lateral thrust
-            let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
+            let maxLateralThrust = 0.14; // Cap the lateral thrust
+            let heightFraction = landerY / (canvas.height -60); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             
             // this applies less thrust as the lander gets closer to the moon surface
