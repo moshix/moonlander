@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.9.1</div>
+        <div>Version: 2.9.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -488,14 +488,16 @@
                 ctx.drawImage(plumeImg, landerX +18, landerY + 65, 36, 36);
                         
                 // show dust if approaching moon surface
-                if (landerY > canvas.height - 270) {
+                if (landerY > canvas.height - 300) {
                     console.log('in dust height - landerY: ', landerY);
-                    ctx.drawImage(leftdustImg, landerX - 64, canvas.height -34,
-                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.3))),
-                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.3)))); // scalecd with hight
-                    ctx.drawImage(rightdustImg, landerX + 64, canvas.height - 34,
-                         Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.3))),
-                        Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.3)))); // scalecd with hight
+                    ctx.drawImage(leftdustImg, landerX - 64, 
+                      Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
+                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                    ctx.drawImage(rightdustImg, landerX + 64,
+                         Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                         Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
+                         Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                 }  
             }
         }
