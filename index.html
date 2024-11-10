@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.0</div>
+        <div>Version: 3.0.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -567,7 +567,7 @@
         function autoland() {
             autolandActivated = true;
 
-            landingMode = 'Autoland P66';
+            landingMode = 'Autoland P64';
 
             if (forceManual) {
                  //console.log(forceManual);
@@ -607,15 +607,15 @@
         
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.11; // Cap the lateral thrust
+            let maxLateralThrust = 0.12; // Cap the lateral thrust
             let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             
             // this applies less thrust as the lander gets closer to the moon surface
-            let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
+            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.32; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.28; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -623,8 +623,9 @@
                if ( Math.abs(velocityX) < maxLateralSpeed) {
                 accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
                } else {
-                   accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
-               }
+                  accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 4; // cut down thurst by 2/3
+
+                }
 
                    // Set thrust direction based on acceleration
                if (accelerationX < 0) {
@@ -649,18 +650,18 @@
 
 
              // Apply Proportional Vertical Thrust**
-            if (landerY < canvas.height - 55) { // Above ground
+            if (landerY < canvas.height - 70) { // Above ground
                 if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
                     // Apply upward thrust if descending too fast
-                    if (velocityY > 1.0) {
-                        accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
+                    if (velocityY > 0.8) {
+                        accelerationY = -0.8 * GRAVITY; // Strong upward thrust to slow descent
                         isThrusting = true;
-                    } else if (velocityY < 0.4) {
-                        accelerationY = -0.1 * GRAVITY;
+                    } else if (velocityY < 0.5) {
+                        accelerationY = -0.3 * GRAVITY;
                         isThrusting = true;
                     } else if (velocityY < 0.2) {
                         // Minimal thrust for a gentle landing
-                        accelerationY = -0.05 * GRAVITY;
+                        accelerationY = -0.1 * GRAVITY;
                         isThrusting = true;
                     } else {
                         accelerationY = -0.00 * GRAVITY; // Let gravity pull the lander down gently
@@ -693,7 +694,7 @@
             if (hasTouchedDown) {
                 // Check if lander is landing within safe speed limits
                 const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
-                const safeLateralSpeed = 1.0;  // Safe lateral landing speed (in meters/sec)
+                const safeLateralSpeed = 1.2;  // Safe lateral landing speed (in meters/sec)
 
                 // Check vertical speed
                 if (Math.abs(velocityY) > safeVerticalSpeed) {
