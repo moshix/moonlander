@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.9.3</div>
+        <div>Version: 2.9.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -84,6 +84,7 @@
         // v 2.7 randomly play eagle has landed when properly landed
     	// v 2.8 changed to nicer lander svg, and many small fixes
     	// v 2.9 dust particles close to surface
+        // v 2.9.4 side thrusters
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -135,6 +136,13 @@
 
         const rightdustImg = new Image();
         rightdustImg.src = 'rightdust.svg';
+
+        const thrustleftImg = new Image();
+        thrustleftImg.src = 'thrustleft.jpg';
+
+        const thrustrightImg = new Image();
+        thrustrightImg.src = 'thrustright.jpg';
+
         // end of images loading
 
         // Sounds loading
@@ -215,6 +223,8 @@
             accelerationX = 0;
             fuel = 1000;
             isThrusting = false;
+            isThrustLeft = false; // for side thrusters
+            isThrustRight = false; // same
             isAutolanding = false;
             autolandActivated = false;
             bestLandingSpot = null;
@@ -487,9 +497,18 @@
             if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
                 ctx.drawImage(plumeImg, landerX +18, landerY + 65, 36, 36);
                         
+                if (isThrustLeft) {
+                    ctx.drawImage(thrustleftImg, landerX - 6, landerY +20, 20,20);
+                }
+
+                if (isThrustRight) {
+                    ctx.drawImage(thrustrightImg, landerX +56 , landerY + 20, 20, 20);
+
+                }
+
                 // show dust if approaching moon surface
                 if (landerY > canvas.height - 300) {
-                    console.log('in dust height - landerY: ', landerY);
+                    //console.log('in dust height - landerY: ', landerY);
                     ctx.drawImage(leftdustImg, landerX - 64, 
                       Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
                       Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
@@ -524,7 +543,7 @@
         function drawISS(currentTime) {
             const orbitRadius = issOrbitRadius;
             issX = canvas.width / 4 + Math.cos(-currentTime * issOrbitSpeed) * orbitRadius;
-            issY = 550 + Math.sin(-currentTime * issOrbitSpeed) * 20;
+            issY = 450 + Math.sin(-currentTime * issOrbitSpeed) * 20;
             ctx.drawImage(issImg, issX, issY, 30, 30);
         }
 
@@ -590,10 +609,27 @@
                } else {
                    accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
                }
+
+                   // Set thrust direction based on acceleration
+               if (accelerationX < 0) {
+                   isThrustLeft = false;;
+                   isThrustRight = true;;
+               } else if (accelerationX > 0) {
+                   isThrustLeft = true;
+                   isThrustRight = false;;
+               } else {
+                   isThrustLeft = false;
+                   isThrustRight = false;
+               }
+
             } else {
                 accelerationX = 0; // Stop lateral movement when close enough
+                isThrustLeft = false;
+               isThrustRight = false;
             }
 
+
+            
 
 
              // Apply Proportional Vertical Thrust**
@@ -626,6 +662,8 @@
                 oldVelocityX = velocityX;
                 accelerationX = 0;
                 isThrusting = false;
+                isThrustLeft = false;
+                isThrustRight = false;
                 hasTouchedDown = true
                 checkLanding(true); // Check if landing is successful
             }
@@ -645,6 +683,8 @@
                 if (Math.abs(velocityY) > safeVerticalSpeed) {
                 isCrashed = true;
                 isThrusting = false;
+                isThrustLeft = false;
+                isThrustRight = false;
                 bestLandingSpot = false;
                 drawLander();
                 if (!isMuted) crashSound.play();
@@ -678,6 +718,8 @@
                 // If all conditions are met, it's a safe landing
                 isCrashed = false;
                 isThrusting = false;
+                isThrustLeft = false;
+                isThrustRight = false;
                 bestLandingSpot = false;
                 accelerationX = 0;
                 // play eagle has landed sound
@@ -839,18 +881,24 @@
                 case 'ArrowLeft':
                     if (!hasLanded && !isCrashed) {
                         accelerationX = -SIDE_THRUST / LANDER_MASS;
+                        isThrustLeft = false;
+                        isThrustRight = true;
                         isThrusting = true;
                     }
                     break;
                 case 'ArrowRight':
                     if (!hasLanded && !isCrashed) {
                         accelerationX = SIDE_THRUST / LANDER_MASS;
+                        isThrustRight = false;
+                        isThrustLeft = true;
                         isThrusting = true;
                     }
                     break;
                 case 'ArrowUp':
                     if (!hasLanded && !isCrashed) {
                         isThrusting = true;
+                        isThrustLeft = false;
+                        isThrustRight = false; // if only going up no side thrusters
                         accelerationY = -APOLLO_THRUST / LANDER_MASS;
                     }
                     break;
@@ -872,6 +920,8 @@
                     break;
                 case 'KeyS':
                     isThrusting = false;
+                    isThrustLeft = false;
+                    isThrustRight = false;
                     forceManual = !forceManual;
                     break;    
                 case 'KeyP':
@@ -889,6 +939,7 @@
         window.addEventListener('keyup', (e) => {
             if (e.code === 'Space' || e.code === 'ArrowUp') {
                 isThrusting = false;
+                
                 rocketSound.pause();
             }
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
