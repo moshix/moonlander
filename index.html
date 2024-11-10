@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 2.8.3</div>
+        <div>Version: 2.9.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -82,40 +82,62 @@
         // v 2.5 asteroid time-based
         // v 2.6 switch to autoland and back to manual with S key
         // v 2.7 randomly play eagle has landed when properly landed
-	// v 2.8 changed to nicer lander svg, and many small fixes
+    	// v 2.8 changed to nicer lander svg, and many small fixes
+    	// v 2.9 dust particles close to surface
 
         const canvas = document.getElementById('gameCanvas');
+        
+
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        console.log('canvas height: ', canvas.height);
 
         // Load images
         const landerImg = new Image();
         landerImg.src = 'lander.svg';
+        
         const plumeImg = new Image();
         plumeImg.src = 'plume.svg';
+        
         const craterImg = new Image();
         craterImg.src = 'crater.svg';
+        
         const earthImg = new Image();
         earthImg.src = 'earth.svg';
+        
         const commanderImg = new Image();
         commanderImg.src = 'commander.svg';
+        
         const planet1Img = new Image();
         planet1Img.src = 'planet1.svg';
+        
         const issImg = new Image();
         issImg.src = 'iss.svg';
+        
         const asteroidImg = new Image();
         asteroidImg.src = 'asteroid.svg'; // Load the asteroid image
+        
         const crashedImg = new Image();
         crashedImg.src = 'crashed.svg'; // For crash state
+        
         const astronautImg = new Image();
         astronautImg.src = 'astronaut.svg';
+        
         const mcdonaldImg = new Image();
         mcdonaldImg.src = 'mcdonald.svg';
+
         const roverImg = new Image();
         roverImg.src = 'rover.svg';
 
-        // Sounds
+        const leftdustImg = new Image();
+        leftdustImg.src = 'leftdust.svg';
+
+        const rightdustImg = new Image();
+        rightdustImg.src = 'rightdust.svg';
+        // end of images loading
+
+        // Sounds loading
         const rocketSound = new Audio('rocket.mp3');
         const crashSound = new Audio('crash.mp3');
         const landedSound = new Audio('eaglelanded.mp3')
@@ -123,6 +145,7 @@
         let isMuted = false;
         let crashPlayed = false;
         let isPaused = false;
+        // end sounds loading
 
         // Global variables
         showBurger = false; // show burger only once in 1 landings
@@ -156,7 +179,7 @@
         let score = 0;
         let bestLandingSpot = null;
         let preTouchdownSpeeds = { velocityY: 0, velocityX: 0 };
-        let landingMode = 'Manual Land';
+        let landingMode = 'Manual Land'; // at start always in manual
 
         // Static star positions
         const stars = [];
@@ -260,7 +283,7 @@
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
             ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3.2, astronautHeight * 6);
-            ctx.drawImage(roverImg, mcdonaldX + 84, astronautY - 3 , astronautWidth *2.2, astronautHeight * 2.2);
+            ctx.drawImage(roverImg, mcdonaldX + 84, astronautY - 5 , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
@@ -282,12 +305,12 @@
                 if (astronautX >= 0 && isSafeLanding(astronautX, astronautWidth)) {
                     // Left side is safe, proceed to draw
                 } else {
-                    console.log("No suitable position for astronaut found.");
+                    //console.log("No suitable position for astronaut found.");
                     return; // Exit if no valid position is found
                 }
             }
         
-            // Draw the astronaut SVG at the calculated position
+            // Draw the astronaut at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
             ctx.drawImage(astronautImg, astronautX, astronautY, astronautWidth, astronautHeight);
         }
@@ -463,6 +486,13 @@
             }
             if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
                 ctx.drawImage(plumeImg, landerX +18, landerY + 65, 36, 36);
+                        
+                // show dust if approaching moon surface
+                if (landerY > canvas.height - 270) {
+                    console.log('in dust height - landerY: ', landerY);
+                    ctx.drawImage(leftdustImg, landerX - 64, canvas.height -34, 40, 48);
+                    ctx.drawImage(rightdustImg, landerX + 64, canvas.height - 34, 40, 48);
+                }  
             }
         }
 
@@ -539,10 +569,12 @@
             let maxLateralThrust = 0.11; // Cap the lateral thrust
             let heightFraction = landerY / canvas.height; // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
+            
+            // this applies less thrust as the lander gets closer to the moon surface
             let scaledLateralThrust = Math.min(maxLateralThrust, lateralDistance / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.34; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.32; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -555,95 +587,99 @@
             } else {
                 accelerationX = 0; // Stop lateral movement when close enough
             }
-        
-        
-            // Apply Proportional Vertical Thrust**
+
+
+
+             // Apply Proportional Vertical Thrust**
             if (landerY < canvas.height - 55) { // Above ground
-                   if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
-                       // Apply upward thrust if descending too fast
-                       if (velocityY > 1.0) {
-                           accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
-                           isThrusting = true;
-                       } else if (velocityY < 0.4) {
-                           accelerationY = -0.1 * GRAVITY;
-                           isThrusting = true;
-                       } else if (velocityY < 0.2) {
-                           // Minimal thrust for a gentle landing
-                           accelerationY = -0.05 * GRAVITY;
-                           isThrusting = true;
-                       } else {
-                           accelerationY =  -0.00  * GRAVITY; // Let gravity pull the lander down gently
-                           isThrusting = false;
-                       }
-                   } else {
-                       // No upward thrust if the lander is already moving upwards (velocityY <= 0)
-                       accelerationY =  0 * GRAVITY; // Only gravity is applied to pull it down
-                       isThrusting = false;
-                   }
-               } else if (landerY >= canvas.height - 55) { // On the ground
-                   accelerationY = 0;
-                   oldVelocityX = velocityX;
-                   accelerationX = 0;
-                   isThrusting = false;
-                   hasTouchedDown = true
-                   checkLanding(true); // Check if landing is successful
-               }
+                if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
+                    // Apply upward thrust if descending too fast
+                    if (velocityY > 1.0) {
+                        accelerationY = -0.7 * GRAVITY; // Strong upward thrust to slow descent
+                        isThrusting = true;
+                    } else if (velocityY < 0.4) {
+                        accelerationY = -0.1 * GRAVITY;
+                        isThrusting = true;
+                    } else if (velocityY < 0.2) {
+                        // Minimal thrust for a gentle landing
+                        accelerationY = -0.05 * GRAVITY;
+                        isThrusting = true;
+                    } else {
+                        accelerationY = -0.00 * GRAVITY; // Let gravity pull the lander down gently
+                        isThrusting = false;
+                    }
+                } else {
+                    // No upward thrust if the lander is already moving upwards (velocityY <= 0)
+                    accelerationY = 0 * GRAVITY; // Only gravity is applied to pull it down
+                    isThrusting = false;
+                }
+            } else {
+            
+            if (landerY >= canvas.height - 55) { // On the ground
+                accelerationY = 0;
+                oldVelocityX = velocityX;
+                accelerationX = 0;
+                isThrusting = false;
+                hasTouchedDown = true
+                checkLanding(true); // Check if landing is successful
+            }
+        }    
         
          }
 
 
 
-function checkLanding(hasTouchedDown) {
-    if (hasTouchedDown) {
-        // Check if lander is landing within safe speed limits
-        const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
-        const safeLateralSpeed = 1.0;  // Safe lateral landing speed (in meters/sec)
+        function checkLanding(hasTouchedDown) {
+            if (hasTouchedDown) {
+                // Check if lander is landing within safe speed limits
+                const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
+                const safeLateralSpeed = 1.0;  // Safe lateral landing speed (in meters/sec)
 
-        // Check vertical speed
-        if (Math.abs(velocityY) > safeVerticalSpeed) {
-        isCrashed = true;
-        isThrusting = false;
-        bestLandingSpot = false;
-        drawLander();
-        if (!isMuted) crashSound.play();
-        statusMessage = 'You crashed due to high vertical speed!';
-            return;
-        }
+                // Check vertical speed
+                if (Math.abs(velocityY) > safeVerticalSpeed) {
+                isCrashed = true;
+                isThrusting = false;
+                bestLandingSpot = false;
+                drawLander();
+                if (!isMuted) crashSound.play();
+                statusMessage = 'You crashed due to high vertical speed!';
+                    return;
+                }
 
-        // Check lateral speed
-        if (Math.abs(velocityX) > safeLateralSpeed) {
-            accelerationX = 0;
-            isCrashed = true;
-            isThrusting = false;
-            bestLandingSpot = false;
-            drawLander();
-            if (!isMuted) crashSound.play();
-            return;
-        }
+                // Check lateral speed
+                if (Math.abs(velocityX) > safeLateralSpeed) {
+                    accelerationX = 0;
+                    isCrashed = true;
+                    isThrusting = false;
+                    bestLandingSpot = false;
+                    drawLander();
+                    if (!isMuted) crashSound.play();
+                    return;
+                }
 
-        // Check if it's landing on a safe flat surface
-        if (!isSafeLanding(landerX, landerWidth)) {
-            isCrashed = true;
-            accelerationX = 0;
-            bestLandingSpot = false;
-            isThrusting = false;
-            drawLander();
-            drawAsteroid();
-            if (!isMuted) crashSound.play();
-            return;
-        }
+                // Check if it's landing on a safe flat surface
+                if (!isSafeLanding(landerX, landerWidth)) {
+                    isCrashed = true;
+                    accelerationX = 0;
+                    bestLandingSpot = false;
+                    isThrusting = false;
+                    drawLander();
+                    drawAsteroid();
+                    if (!isMuted) crashSound.play();
+                    return;
+                }
 
-        // If all conditions are met, it's a safe landing
-        isCrashed = false;
-        isThrusting = false;
-        bestLandingSpot = false;
-        accelerationX = 0;
-        // play eagle has landed sound
-        if (!isMuted) {
-         if (Math.floor(Math.random() * 6) + 1 === 1) landedSound.play();  
+                // If all conditions are met, it's a safe landing
+                isCrashed = false;
+                isThrusting = false;
+                bestLandingSpot = false;
+                accelerationX = 0;
+                // play eagle has landed sound
+                if (!isMuted) {
+                if (Math.floor(Math.random() * 6) + 1 === 1) landedSound.play();  
+                }
+            }
         }
-    }
-}
 
           // draw a crossmark where the lander has decided to land
           function drawLandingCross() {
@@ -668,29 +704,29 @@ function checkLanding(hasTouchedDown) {
               }
           }
 
-function isMobile() {
-    // is it a mobile client?
-    return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
+        function isMobile() {
+            // is it a mobile client?
+            return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
 
-function createAutolandButton() {
-    const button = document.createElement("button");
-    button.innerHTML = "autoland now!";
-    button.style.position = "absolute";
-    button.style.top = "90px";
-    button.style.right = "5px";
-    button.style.zIndex = "10"; // Ensure it appears above the canvas
-    button.style.padding = "10px 20px";
-    button.style.fontSize = "18px";
+        function createAutolandButton() {
+            const button = document.createElement("button");
+            button.innerHTML = "autoland now!";
+            button.style.position = "absolute";
+            button.style.top = "90px";
+            button.style.right = "5px";
+            button.style.zIndex = "10"; // Ensure it appears above the canvas
+            button.style.padding = "10px 20px";
+            button.style.fontSize = "18px";
 
-    // Add event listener to trigger autoland when clicked
-    button.addEventListener("click", () => {
-        autoland();
-    });
+            // Add event listener to trigger autoland when clicked
+            button.addEventListener("click", () => {
+                autoland();
+            });
 
-    // Append the button to the body
-    document.body.appendChild(button);
-}
+            // Append the button to the body
+            document.body.appendChild(button);
+        }
 
 
 
