@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.9</div>
+        <div>Version: 3.0.10</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -92,6 +92,7 @@
         // v 3.0.5 lateral thrust attenuation
         // v 3.0.6 ullage before staring main engine
         // v 3.0.7 crash sound volume control
+        // v 3.0.8-10 various small fixes
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -139,10 +140,10 @@
         roverImg.src = 'rover.svg';
 
         const leftdustImg = new Image();
-        leftdustImg.src = 'leftdust.svg';
+        leftdustImg.src = 'leftdust.png';
 
         const rightdustImg = new Image();
-        rightdustImg.src = 'rightdust.svg';
+        rightdustImg.src = 'rightdust.png';
 
         const thrustleftImg = new Image();
         thrustleftImg.src = 'thrustleft.jpg';
@@ -189,7 +190,7 @@
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
         const SIDE_THRUST = 4000; // Apollo lander side thrusters in N
         const LANDER_MASS = 15103; // Mass of Apollo 11 lander in kg
-        let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, statusMessage, earthX, earthY;
+        let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, earthX, earthY;
         let commanderX = 0;
         let commanderY = 50;
         let planet1X = 0, planet1Y = 800;
@@ -246,7 +247,6 @@
             autolandActivated = false;
             bestLandingSpot = null;
             preTouchdownSpeeds = { velocityY: 0, velocityX: 0 };
-            statusMessage = 'Manual Mode';
             crashPlayed = false;
             hasLanded = false;
             isCrashed = false;
@@ -529,14 +529,14 @@
                 if (landerY > canvas.height - 300) {
                     //console.log('in dust height - landerY: ', landerY);
                     ctx.drawImage(leftdustImg, landerX - 64, 
-                      canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (110 - 34),
-                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
-                      Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                      canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
+                      Math.max(40, Math.min(110, 110 - ((canvas.height - landerY) * 0.2))),
+                      Math.max(40, Math.min(110, 110 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                     ctx.drawImage(rightdustImg, landerX + 64,
                          //Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
-                         canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (110 - 34),
-                         Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
-                         Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                         canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
+                         Math.max(40, Math.min(110, 110 - ((canvas.height - landerY) * 0.2))),
+                         Math.max(40, Math.min(110, 110 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                 }  
             }
         }
@@ -881,7 +881,6 @@
                     landerY = canvas.height - 50;
                     oldVelocityY =  velocityY; 
                     oldVelocityX =  velocityX;
-                    //velocityX = 0;
                     hasLanded = true;
                     checkLanding(true);
                 }
