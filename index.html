@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.5</div>
+        <div>Version: 3.0.6</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -617,7 +617,7 @@
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.40; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.45; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -629,10 +629,10 @@
 
                 }
 
-               if (velocityX > 0.7 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+               if (velocityX > 0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
                    accelerationX = -scaledLateralThrust * 0.80;
                }
-               if (velocityX < -0.87 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+               if (velocityX < -0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
                    accelerationX = scaledLateralThrust * 0.80;
                }
 
