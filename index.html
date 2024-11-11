@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.3</div>
+        <div>Version: 3.0.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -87,6 +87,7 @@
         // v 2.9.4 side thrusters
         // v. 2.9.5 change moon size randomly to make Restart more obvious
         // v 3.0 Michael Collins is happy when lander lands correctly
+        // v 3.0.4 apply contrary thrust if lateral speed too high
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -627,6 +628,14 @@
                   accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 4; // cut down thurst by 2/3
 
                 }
+
+               if (velocityX > 0.8 && landerY < canvas.height - 100){ // contrary thrust if not too close to grnd
+                   accelerationX = -scaledLateralThrust * 0.75;
+               }
+               if (velocityX < -0.8 && landerY < canvas.height - 100){ // contrary thrust if not too close to grnd
+                   accelerationX = scaledLateralThrust * 0.75;
+               }
+
 
                    // Set thrust direction based on acceleration
                if (accelerationX < 0) {
