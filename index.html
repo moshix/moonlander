@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.8</div>
+        <div>Version: 3.0.9</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -529,11 +529,12 @@
                 if (landerY > canvas.height - 300) {
                     //console.log('in dust height - landerY: ', landerY);
                     ctx.drawImage(leftdustImg, landerX - 64, 
-                      Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                      canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (110 - 34),
                       Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
                       Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                     ctx.drawImage(rightdustImg, landerX + 64,
-                         Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                         //Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                         canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (110 - 34),
                          Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
                          Math.max(25, Math.min(80, 80 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                 }  
@@ -710,7 +711,7 @@
             if (hasTouchedDown) {
                 // Check if lander is landing within safe speed limits
                 const safeVerticalSpeed = 2.0; // Safe vertical landing speed (in meters/sec)
-                const safeLateralSpeed = 1.2;  // Safe lateral landing speed (in meters/sec)
+                const safeLateralSpeed = 1.3;  // Safe lateral landing speed (in meters/sec)
 
                 // Check vertical speed
                 if (Math.abs(velocityY) > safeVerticalSpeed) {
