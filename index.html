@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.1.0</div>
+        <div>Version: 3.1.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -119,7 +119,7 @@
         commanderImg.src = 'commander.png';
         
         const planet1Img = new Image();
-        planet1Img.src = 'planet1.svg';
+        planet1Img.src = 'saturn.jpg';
         
         const issImg = new Image();
         issImg.src = 'iss.svg';
@@ -561,14 +561,14 @@
             const orbitRadius = planet1OrbitRadius;
             planet1X = canvas.width / 3 + Math.cos(-currentTime * planet1OrbitSpeed) * orbitRadius;
             planet1Y = 290 + Math.sin(-currentTime * planet1OrbitSpeed) * 30;
-            ctx.drawImage(planet1Img, planet1X, planet1Y, 40, 40);
+            ctx.drawImage(planet1Img, planet1X, planet1Y, 64, 60);
         }
 
         function drawISS(currentTime) {
             const orbitRadius = issOrbitRadius;
             issX = canvas.width / 4 + Math.cos(-currentTime * issOrbitSpeed) * orbitRadius;
             issY = 450 + Math.sin(-currentTime * issOrbitSpeed) * 20;
-            ctx.drawImage(issImg, issX, issY, 30, 30);
+            ctx.drawImage(issImg, issX, issY, 60, 60);
         }
 
 
