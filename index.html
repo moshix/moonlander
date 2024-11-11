@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.0.4</div>
+        <div>Version: 3.0.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -617,7 +617,7 @@
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.28; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.40; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -629,11 +629,11 @@
 
                 }
 
-               if (velocityX > 0.8 && landerY < canvas.height - 100){ // contrary thrust if not too close to grnd
-                   accelerationX = -scaledLateralThrust * 0.75;
+               if (velocityX > 0.7 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+                   accelerationX = -scaledLateralThrust * 0.80;
                }
-               if (velocityX < -0.8 && landerY < canvas.height - 100){ // contrary thrust if not too close to grnd
-                   accelerationX = scaledLateralThrust * 0.75;
+               if (velocityX < -0.87 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+                   accelerationX = scaledLateralThrust * 0.80;
                }
 
 
@@ -652,7 +652,7 @@
             } else {
                 accelerationX = 0; // Stop lateral movement when close enough
                 isThrustLeft = false;
-               isThrustRight = false;
+                isThrustRight = false;
             }
 
 
@@ -684,7 +684,7 @@
                 }
             } else {
             
-            if (landerY >= canvas.height - 55) { // On the ground
+            if (landerY >= canvas.height - 69) { // On the ground
                 accelerationY = 0;
                 oldVelocityX = velocityX;
                 accelerationX = 0;
@@ -714,9 +714,12 @@
                 isThrustRight = false;
                 bestLandingSpot = false;
                 drawLander();
-                if (!isMuted) crashSound.play();
-                statusMessage = 'You crashed due to high vertical speed!';
-                    return;
+                if (!isMuted) {
+                    crashSound.volume = 0.2;
+                    crashSound.play();
+                  }
+               
+                return;
                 }
 
                 // Check lateral speed
