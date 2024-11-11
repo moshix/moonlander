@@ -104,7 +104,7 @@
 
         // Load images
         const landerImg = new Image();
-        landerImg.src = 'lander.svg';
+        landerImg.src = 'lander.png';
         
         const plumeImg = new Image();
         plumeImg.src = 'plume.svg';
@@ -116,7 +116,7 @@
         earthImg.src = 'earth.svg';
         
         const commanderImg = new Image();
-        commanderImg.src = 'commander.svg';
+        commanderImg.src = 'commander.png';
         
         const planet1Img = new Image();
         planet1Img.src = 'planet1.svg';
@@ -551,7 +551,7 @@
             const orbitRadius = canvas.width / 3;
             commanderX = canvas.width / 2 + Math.cos(currentTime * commanderOrbitSpeed) * orbitRadius;
             commanderY = 50 + Math.sin(currentTime * commanderOrbitSpeed) * 30;
-            ctx.drawImage(commanderImg, commanderX, commanderY, 50, 50);
+            ctx.drawImage(commanderImg, commanderX, commanderY, 85, 50);
             if (showhappy) {
                 ctx.drawImage(happyImg, commanderX+10, commanderY +11, 32,32);
             }
