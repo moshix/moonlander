@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.1.3</div>
+        <div>Version: 3.1.4</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -152,7 +152,7 @@
         thrustrightImg.src = 'thrustright.jpg';
 
         const happyImg = new Image();
-        happyImg.src = 'happy.svg';
+        happyImg.src = 'happy.png';
 
         // end of images loading
 
@@ -554,7 +554,7 @@
             commanderY = 50 + Math.sin(currentTime * commanderOrbitSpeed) * 30;
             ctx.drawImage(commanderImg, commanderX, commanderY, 85, 50);
             if (showhappy) {
-                ctx.drawImage(happyImg, commanderX+45, commanderY +11, 32,32);
+               // ctx.drawImage(happyImg, commanderX+15, commanderY +9, 37,37);
             }
         }
 
