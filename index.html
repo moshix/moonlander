@@ -383,7 +383,7 @@
                 ctx.textAlign = "center";
                 ctx.font = "37px Arial"; // for stats smaller font
                 if (mcdonaldShown) {
-                  if (showBurger) ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
+                  if (showBurger && !isMobile) ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
                   landingMode = 'Landed';
 		        }
                 mcdonaldShown = false; // reset immediately
@@ -922,7 +922,7 @@
             drawStars();  // Stars drawn first, covering the whole canvas
             drawEarth();
             drawLander(currentTime);
-            drawCommanderModule(currentTime);
+            if (!isMobile) drawCommanderModule(currentTime);
             drawPlanet1(currentTime);
             drawISS(currentTime);
             drawCraters();  // Craters drawn last
