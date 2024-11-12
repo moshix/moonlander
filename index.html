@@ -32,7 +32,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.1.6</div>
+        <div>Version: 3.1.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -1001,11 +1001,16 @@
         window.addEventListener('keyup', (e) => {
             if (e.code === 'Space' || e.code === 'ArrowUp') {
                 isThrusting = false;
-                
+                isThrustLeft = false;
+                isThrustRight = false;
+                console.log("Plume hidden on ArrowUp keyup");
                 rocketSound.pause();
             }
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
                 accelerationX = 0;
+                isThrusting = false;
+                isThrustLeft = false;
+                isThrustRight = false;
             }
         });
        
