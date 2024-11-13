@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoonLander with AGC autoland</title>
+    <link rel="icon" href="favicon.ico" type="image/png">
     <style>
         body, html {
             margin: 0;
@@ -32,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.1.9</div>
+        <div>Version: 3.2.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -94,6 +95,7 @@
         // v 3.0.7 crash sound volume control
         // v 3.0.8-10 various small fixes
         // v 3.1.0-   various bug fixes and enhancements including realistic items
+        // v 3.2.0
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -538,14 +540,14 @@
                     //console.log('in dust height - landerY: ', landerY);
                     ctx.drawImage(leftdustImg, landerX - 64, 
                       //canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
-                      canvas.height - Math.max(30, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
-                      Math.max(40, Math.min(130, 130 - ((canvas.height - landerY) * 0.2))),
-                      Math.max(40, Math.min(130, 130 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                      canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
+                      Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
+                      Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                     ctx.drawImage(rightdustImg, landerX + 64,
                          //Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
-                         canvas.height - Math.max(30, Math.min(80, 80 - ((canvas.height - landerY) * 0.2))),
-                         Math.max(40, Math.min(110, 130 - ((canvas.height - landerY) * 0.2))),
-                         Math.max(40, Math.min(110, 130 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                         canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
+                         Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
+                         Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
                 }  
             }
         }
