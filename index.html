@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.2.1</div>
+        <div>Version: 3.2.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -523,10 +523,8 @@
             } else {
                 ctx.drawImage(landerImg, landerX, landerY, 75, 75);
             }
-            if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
-                ctx.drawImage(plumeImg, landerX -26, landerY + 19, 130, 150);
-                        
-                if (isThrustLeft) {
+
+            if (isThrustLeft && !isCrashed && !hasLanded) {
                     ctx.drawImage(thrustleftImg, landerX - 6, landerY +20, 20,20);
                 }
 
@@ -534,6 +532,11 @@
                     ctx.drawImage(thrustrightImg, landerX +56 , landerY + 20, 20, 20);
 
                 }
+
+            if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
+                ctx.drawImage(plumeImg, landerX -26, landerY + 19, 130, 150);
+                        
+
 
                 // show dust if approaching moon surface
                 if (landerY > canvas.height - 300) {
@@ -950,7 +953,7 @@
                         accelerationX = -SIDE_THRUST / LANDER_MASS;
                         isThrustLeft = false;
                         isThrustRight = true;
-                        isThrusting = true;
+                        isThrusting = false;
                     }
                     break;
                 case 'ArrowRight':
@@ -958,7 +961,7 @@
                         accelerationX = SIDE_THRUST / LANDER_MASS;
                         isThrustRight = false;
                         isThrustLeft = true;
-                        isThrusting = true;
+                        isThrusting = false;
                     }
                     break;
                 case 'ArrowUp':
