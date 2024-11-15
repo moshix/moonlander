@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.2.2</div>
+        <div>Version: 3.2.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -95,7 +95,7 @@
         // v 3.0.7 crash sound volume control
         // v 3.0.8-10 various small fixes
         // v 3.1.0-   various bug fixes and enhancements including realistic items
-        // v 3.2.0
+        // v 3.2.0 fix various stuff and code cleanup
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -238,8 +238,8 @@
 
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
             bestLandingSpot = false;
-            showhappy = false; // don't show happy Collin in commander
-            landerY = 50;
+            showhappy = false; // don't show happy Collins in commander
+            landerY = 45;
             landerX = canvas.width / 2 - 25;
             velocityY = 0;
             velocityX = 0.3;
@@ -536,24 +536,29 @@
             if (isThrusting && fuel > 0 && !isCrashed && !hasLanded) {
                 ctx.drawImage(plumeImg, landerX -26, landerY + 19, 130, 150);
                         
-
-
-                // show dust if approaching moon surface
-                if (landerY > canvas.height - 300) {
-                    //console.log('in dust height - landerY: ', landerY);
-                    ctx.drawImage(leftdustImg, landerX - 64, 
-                      //canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
-                      canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
-                      Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
-                      Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
-                    ctx.drawImage(rightdustImg, landerX + 64,
-                         //Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
-                         canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
-                         Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
-                         Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
-                }  
+                drawDust();
+               
+ 
             }
         }
+
+        function drawDust() {
+            // show dust if approaching moon surface
+            if (landerY > canvas.height - 300) {
+                //console.log('in dust height - landerY: ', landerY);
+                ctx.drawImage(leftdustImg, landerX - 64,
+                    //canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
+                    canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
+                    Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
+                    Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+                ctx.drawImage(rightdustImg, landerX + 64,
+                    //Math.max(canvas.height - 50, canvas.height - 34 - ((canvas.height - landerY) * 0.1)), // 
+                    canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
+                    Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2))),
+                    Math.max(40, Math.min(140, 140 - ((canvas.height - landerY) * 0.2)))); // scalecd with hight
+            }  
+        }
+
 
         function drawEarth() {
             //console.log('earthsize: ', earthsize); // for debugging...
@@ -631,7 +636,7 @@
         
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.14; // Cap the lateral thrust
+            let maxLateralThrust = 0.15; // Cap the lateral thrust
             let heightFraction = landerY / (canvas.height -60); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             
@@ -639,7 +644,7 @@
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.30; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -652,10 +657,10 @@
                 }
 
                if (velocityX > 0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
-                   accelerationX = -scaledLateralThrust * 0.80;
+                   accelerationX = -scaledLateralThrust * 0.83;
                }
                if (velocityX < -0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
-                   accelerationX = scaledLateralThrust * 0.80;
+                   accelerationX = scaledLateralThrust * 0.83;
                }
 
 
@@ -890,6 +895,7 @@
                 
                 if (isThrusting && fuel > 0) {
                     fuel -= 5 * deltaTime;
+                    // drawDust();
                     if (!isMuted) rocketSound.play();
                
                     if (fuel < 0) fuel = 0;
