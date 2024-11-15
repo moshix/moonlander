@@ -636,7 +636,7 @@
         
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.15; // Cap the lateral thrust
+            let maxLateralThrust = 0.14; // Cap the lateral thrust
             let heightFraction = landerY / (canvas.height -60); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             
@@ -644,7 +644,7 @@
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.32; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -656,10 +656,10 @@
 
                 }
 
-               if (velocityX > 0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+               if (velocityX > 0.72 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
                    accelerationX = -scaledLateralThrust * 0.83;
                }
-               if (velocityX < -0.75 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
+               if (velocityX < -0.72 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
                    accelerationX = scaledLateralThrust * 0.83;
                }
 
