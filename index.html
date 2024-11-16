@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.2.5</div>
+        <div>Version: 3.2.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -637,14 +637,14 @@
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
             let maxLateralThrust = 0.14; // Cap the lateral thrust
-            let heightFraction = landerY / (canvas.height -60); // landerY as a fraction of canvas
+            let heightFraction = landerY / (canvas.height -50); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
             
             // this applies less thrust as the lander gets closer to the moon surface
-            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
+            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +4 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
              // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.32; // Maximum allowed lateral speed
+           const maxLateralSpeed = 0.33; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -687,8 +687,8 @@
 
 
              // Apply Proportional Vertical Thrust**
-            if (landerY < canvas.height - 70) { // Above ground
-                if (velocityY > 0.2) { // Only apply thrust if the lander is descending (velocityY > 0)
+            if (landerY < canvas.height - 60) { // Above ground
+                if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
                     // Apply upward thrust if descending too fast
                     if (velocityY > 0.8) {
                         accelerationY = -0.8 * GRAVITY; // Strong upward thrust to slow descent
