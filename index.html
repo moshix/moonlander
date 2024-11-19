@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.2.7</div>
+        <div>Version: 3.2.8</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -636,15 +636,16 @@
         
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.14; // Cap the lateral thrust
+            let maxLateralThrust = 0.20; // Cap the lateral thrust
             let heightFraction = landerY / (canvas.height -50); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
+
+            // Cap lateral speed to x m/sec
+           const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
             
             // this applies less thrust as the lander gets closer to the moon surface
-            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +4 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
+            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
-             // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.33; // Maximum allowed lateral speed
         
         
            if (Math.abs(lateralDistance) > 1) {
@@ -652,15 +653,17 @@
                if ( Math.abs(velocityX) < maxLateralSpeed) {
                 accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
                } else {
-                  accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 4; // cut down thurst by 2/3
+                  accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
 
                 }
 
-               if (velocityX > 0.72 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
-                   accelerationX = -scaledLateralThrust * 0.83;
+               if (velocityX >  0.50 ){ // contrary thrust if not too close to grnd
+                   
+                    accelerationX = -scaledLateralThrust * 1.33;
                }
-               if (velocityX < -0.72 && landerY < canvas.height - 65){ // contrary thrust if not too close to grnd
-                   accelerationX = scaledLateralThrust * 0.83;
+
+               if (velocityX < -0.50 ){ // contrary thrust if not too close to grnd
+                   accelerationX = scaledLateralThrust * 1.33;
                }
 
 
