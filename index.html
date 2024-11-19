@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.6</div>
+        <div>Version: 3.3.7</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -776,11 +776,17 @@
             keyPressedLongtime = true; // A key has been pressed
             keyTimeout = setTimeout(() => {
                 keyPressedLongtime = false; // Set to false after 5 seconds of no key presses
-                topMsg = "Autopilot engaged - cursor keys to land manually";
+                    
+                if (!isCrashed || !hasLanded) {
+                    topMsg = "Autopilot engaged - cursor keys to land manually";
+                } else {
+                    topMsg = "";
+                }
+                    
                 demoMode = true; // display demomode text
                 autolandActivated = true;
                 
-            }, 1100);
+            }, 1200);
         }
 
         function checkLanding(hasTouchedDown) {
@@ -984,6 +990,7 @@
                     oldVelocityY =  velocityY; 
                     oldVelocityX =  velocityX;
                     hasLanded = true;
+                    topMsg = "";
                     checkLanding(true);
                 }
 
