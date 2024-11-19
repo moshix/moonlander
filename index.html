@@ -25,7 +25,7 @@
             position: absolute;
             top: 200px;
             left: 10px;
-            color: white;
+            color: rgb(82, 164, 218);
             font-family: monospace;
         }
     </style>
@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.2</div>
+        <div>Version: 3.3.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -42,12 +42,11 @@
         <div>Fuel Consumption: <span id="consumption">0</span> kg/s</div>
     </div>
     <div id="legend">
-        <div>^ < > </div>
-        <div>A:          Autoland</div>
-        <div>P:          Pause/Unpause</div>
-        <div>R:          Restart</div>
-        <div>M:          Mute/Unmute</div>
-        <div>Game goes into demo mode if no key pressed</div>
+        <div>cursor keys..Steering </div>
+        <div>A:...........Autoland</div>
+        <div>P............Pause/Unpause</div>
+        <div>R............Restart</div>
+        <div>M............Mute/Unmute</div>
         <div>_______________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
@@ -97,7 +96,7 @@
         // v 3.1.0-   various bug fixes and enhancements including realistic items
         // v 3.2.0 fix various stuff and code cleanup
         // v 3.3.0 entertainment mode if no key pressed for long time
-        // v 3.3.1 any steering key during autoland, takes out autopilot mode
+        // v 3.3.1-9 any steering key during autoland, takes out autopilot mode
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -176,6 +175,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        topMsg = "Demo mode - any key to return to game mode";
         demoMode = false; // are we in demo mode?
         keyPressedLongtime = true; // this control entering entertainment mode
         let keyTimeout; // for time of keyPressedLongTime
@@ -371,6 +371,8 @@
             function resetKeyPressTimer2() {
                 clearTimeout(keyTimeout2); // Clear any existing timeout
                 keyTimeout2 = setTimeout(() => {
+                
+                topMsg = "Demo mode - any key to return to game mode";
                 demoMode = true;
                 isMuted = true;
                 initializeGame(); // Restart the game after 5 seconds of no key press
@@ -771,10 +773,7 @@
             keyPressedLongtime = true; // A key has been pressed
             keyTimeout = setTimeout(() => {
                 keyPressedLongtime = false; // Set to false after 5 seconds of no key presses
-                ctx.fillStyle = "crimson"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.font = "18px Arial"; // for stats smaller font
-                ctx.fillText("Demo mode", canvas.width /2, 40);
+                topMsg = "Autopilot takes over - cursor keys to land manually";
                 demoMode = true; // display demomode text
                 autolandActivated = true;
                 
@@ -915,7 +914,7 @@
             if (demoMode){
                 ctx.fillStyle = "crimson";
                 ctx.textAlign = "center";
-                ctx.fillText("Demo mode - any key to return to game mode", canvas.width /2, 40);
+                ctx.fillText(topMsg, canvas.width /2, 40);
                 ctx.font = "19px Arial"; 
             }
         }
