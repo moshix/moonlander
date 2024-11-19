@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.0</div>
+        <div>Version: 3.3.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -47,7 +47,6 @@
         <div>P:          Pause/Unpause</div>
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
-        <div>S:          Switch to manual</div>
         <div>Game goes into demo mode if no key pressed</div>
         <div>_______________________ </div>
         <div>2024 by hotdog studios</div>
@@ -98,6 +97,7 @@
         // v 3.1.0-   various bug fixes and enhancements including realistic items
         // v 3.2.0 fix various stuff and code cleanup
         // v 3.3.0 entertainment mode if no key pressed for long time
+        // v 3.3.1 any steering key during autoland, takes out autopilot mode
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -1015,6 +1015,8 @@
                     break;
                 case 'ArrowLeft':
                     if (!hasLanded && !isCrashed) {
+                        forceManual = !forceManual;
+                        autolandActivated = false;
                         accelerationX = -SIDE_THRUST / LANDER_MASS;
                         isThrustLeft = false;
                         isThrustRight = true;
@@ -1023,6 +1025,8 @@
                     break;
                 case 'ArrowRight':
                     if (!hasLanded && !isCrashed) {
+                        forceManual = !forceManual;
+                        autolandActivated = false;
                         accelerationX = SIDE_THRUST / LANDER_MASS;
                         isThrustRight = false;
                         isThrustLeft = true;
@@ -1031,6 +1035,8 @@
                     break;
                 case 'ArrowUp':
                     if (!hasLanded && !isCrashed) {
+                        forceManual = !forceManual;
+                        autolandActivated = false;
                         isThrusting = true;
                         isThrustLeft = false;
                         isThrustRight = false; // if only going up no side thrusters
