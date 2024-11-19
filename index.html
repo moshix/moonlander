@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.2.8</div>
+        <div>Version: 3.3.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -48,6 +48,7 @@
         <div>R:          Restart</div>
         <div>M:          Mute/Unmute</div>
         <div>S:          Switch to manual</div>
+        <div>Game goes into demo mode if no key pressed</div>
         <div>_______________________ </div>
         <div>2024 by hotdog studios</div>
     </div>
@@ -96,6 +97,7 @@
         // v 3.0.8-10 various small fixes
         // v 3.1.0-   various bug fixes and enhancements including realistic items
         // v 3.2.0 fix various stuff and code cleanup
+        // v 3.3.0 entertainment mode if no key pressed for long time
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -171,7 +173,14 @@
         let isPaused = false;
         // end sounds loading
 
+        /////////////////////////////////////
         // Global variables
+        /////////////////////////////////////
+        keyPressedLongtime = true; // this control entering entertainment mode
+        let keyTimeout; // for time of keyPressedLongTime
+        keyPressedLongtime2 = true; // this control entering entertainment mode
+        let keyTimeout2; // for time of keyPressedLongTime
+
         altitude = 500; // lander altitude in human readable form
         let earthsize = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
         showBurger = false; // show burger only once in 1 landings
@@ -232,11 +241,13 @@
 
 
         function initializeGame() {
-           
+            resetKeyPressTimer();  // to switch to entertainment mode if no key pressed
+            resetKeyPressTimer2(); // to restart game after lanidng if no key pressed 5 sec
            if (animationID) cancelAnimationFrame(animationID);
          
 
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
+          
             bestLandingSpot = false;
             showhappy = false; // don't show happy Collins in commander
             landerY = 45;
@@ -288,6 +299,8 @@
             }
 
             animationID = requestAnimationFrame(gameLoop);
+
+
         }
 
         function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
@@ -353,12 +366,27 @@
             ctx.drawImage(astronautImg, astronautX, astronautY, astronautWidth*1.3, astronautHeight*1.3);
         }
 
+
+            function resetKeyPressTimer2() {
+                clearTimeout(keyTimeout2); // Clear any existing timeout
+                keyTimeout2 = setTimeout(() => {
+                ctx.fillStyle = "crimson"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.fillText("Demo mode", canvas.width /2, 40);
+
+                ctx.font = "18px Arial"; // for stats smaller font
+                isMuted = true;
+                initializeGame(); // Restart the game after 5 seconds of no key press
+                    
+                }, 17000);
+        }
         function drawStatusLine() {
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
             oldVelocityYF = Number(oldVelocityY).toFixed(2);
 
             if (hasLanded && !isCrashed) {
+                //clearTimeout(keyTimeout2);
 		        landerY = canvas.height -67; // put lander on surface
                 showhappy = true;
                 points = fuel - ( (oldVelocityX * 200) + (oldVelocityY * 200));
@@ -385,6 +413,11 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
+                ctx.fillStyle = "cyan"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "18px Arial"; // for stats smaller font
+                ctx.fillText("Game restarts into demo mode if no key pressed", canvas.width /2, 220);
+                ctx.fillText("S to switch to manual mode after restarting (with R)", canvas.width /2, 240);
 
                 // motivational message
                 ctx.fillStyle = "#FFCC00"; // Green color for successful landing
@@ -395,8 +428,10 @@
                   landingMode = 'Landed';
 		        }
                 mcdonaldShown = false; // reset immediately
+                
 
             } else if (isCrashed) {
+                //clearTimeout(keyTimeout2);
                 ctx.fillStyle = "red"; // Red color for crash
                 ctx.textAlign = "center";
                 ctx.fillText("Crashed", canvas.width /2 , 80);
@@ -416,8 +451,14 @@
                 ctx.textAlign = "center";
                 ctx.font = "28px Arial"; // for stats smaller font
                 ctx.fillText("Press R to restart", canvas.width /2, 170);
+                ctx.fillStyle = "cyan"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "18px Arial"; // for stats smaller font
+                ctx.fillText("Game restarts into demo mode if no key pressed", canvas.width /2, 220);
+                ctx.fillText("S to switch to manual mode after restarting (with R)", canvas.width /2, 240);
 		        landingMode = '';    
             }
+           
         }
 
 
@@ -515,7 +556,7 @@
                 ctx.fillStyle = "white"; 
                 ctx.textAlign = "right";
                 ctx.fillText("Muted", canvas.width -47, 80);
-                ctx.font = "10px Arial"; 
+                ctx.font = "19px Arial"; 
              }
 
             if (isCrashed) {
@@ -728,7 +769,20 @@
         
          }
 
-
+        function resetKeyPressTimer() {
+            clearTimeout(keyTimeout); // Clear any existing timeout
+            keyPressedLongtime = true; // A key has been pressed
+            keyTimeout = setTimeout(() => {
+                keyPressedLongtime = false; // Set to false after 5 seconds of no key presses
+                ctx.fillStyle = "crimson"; // Green color for successful landing
+                ctx.textAlign = "center";
+                ctx.font = "18px Arial"; // for stats smaller font
+                ctx.fillText("Demo mode", canvas.width /2, 40);
+               
+                autolandActivated = true;
+                
+            }, 1300);
+        }
 
         function checkLanding(hasTouchedDown) {
             if (hasTouchedDown) {
@@ -953,6 +1007,8 @@
         }
 
         window.addEventListener('keydown', (e) => {
+            resetKeyPressTimer(); // Reset the timer on every key press
+            resetKeyPressTimer2(); // for after landing/crashing
             switch (e.code) {
                 case 'Space':
                     if (!hasLanded && !isCrashed) isThrusting = true;
