@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.1</div>
+        <div>Version: 3.3.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -176,6 +176,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        demoMode = false; // are we in demo mode?
         keyPressedLongtime = true; // this control entering entertainment mode
         let keyTimeout; // for time of keyPressedLongTime
         keyPressedLongtime2 = true; // this control entering entertainment mode
@@ -370,11 +371,7 @@
             function resetKeyPressTimer2() {
                 clearTimeout(keyTimeout2); // Clear any existing timeout
                 keyTimeout2 = setTimeout(() => {
-                ctx.fillStyle = "crimson"; // Green color for successful landing
-                ctx.textAlign = "center";
-                ctx.fillText("Demo mode", canvas.width /2, 40);
-
-                ctx.font = "18px Arial"; // for stats smaller font
+                demoMode = true;
                 isMuted = true;
                 initializeGame(); // Restart the game after 5 seconds of no key press
                     
@@ -417,7 +414,7 @@
                 ctx.textAlign = "center";
                 ctx.font = "18px Arial"; // for stats smaller font
                 ctx.fillText("Game restarts into demo mode if no key pressed", canvas.width /2, 220);
-                ctx.fillText("S to switch to manual mode after restarting (with R)", canvas.width /2, 240);
+
 
                 // motivational message
                 ctx.fillStyle = "#FFCC00"; // Green color for successful landing
@@ -455,7 +452,6 @@
                 ctx.textAlign = "center";
                 ctx.font = "18px Arial"; // for stats smaller font
                 ctx.fillText("Game restarts into demo mode if no key pressed", canvas.width /2, 220);
-                ctx.fillText("S to switch to manual mode after restarting (with R)", canvas.width /2, 240);
 		        landingMode = '';    
             }
            
@@ -763,6 +759,7 @@
                 isThrustLeft = false;
                 isThrustRight = false;
                 hasTouchedDown = true
+                //clearTimeout(keyTimeout2); // clear timeout for demo mode
                 checkLanding(true); // Check if landing is successful
             }
         }    
@@ -778,7 +775,7 @@
                 ctx.textAlign = "center";
                 ctx.font = "18px Arial"; // for stats smaller font
                 ctx.fillText("Demo mode", canvas.width /2, 40);
-               
+                demoMode = true; // display demomode text
                 autolandActivated = true;
                 
             }, 1300);
@@ -915,11 +912,18 @@
             ctx.font = '18px monospace';
             ctx.textAlign = 'right';
             ctx.fillText(landingMode, canvas.width - 20, 40);
+            if (demoMode){
+                ctx.fillStyle = "crimson";
+                ctx.textAlign = "center";
+                ctx.fillText("Demo mode - any key to return to game mode", canvas.width /2, 40);
+                ctx.font = "19px Arial"; 
+            }
         }
 
         let lastTime = 0;
         
         function gameLoop(currentTime) {
+
     		// Calculate the altitude (distance from the bottom of the canvas)
             altitude = canvas.height - landerY - 55; // Lander height from the bottom
 
@@ -1009,6 +1013,7 @@
         window.addEventListener('keydown', (e) => {
             resetKeyPressTimer(); // Reset the timer on every key press
             resetKeyPressTimer2(); // for after landing/crashing
+            demoMode = false;
             switch (e.code) {
                 case 'Space':
                     if (!hasLanded && !isCrashed) isThrusting = true;
