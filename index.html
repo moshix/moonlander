@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.3</div>
+        <div>Version: 3.3.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -175,6 +175,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
         demoMode = false; // are we in demo mode?
         keyPressedLongtime = true; // this control entering entertainment mode
@@ -196,7 +197,8 @@
         const commanderOrbitSpeed = 0.0001;
         const planet1OrbitSpeed = 0.00001;
         const issOrbitSpeed = 0.00005;
-         CRATER_COUNT = 7;
+        
+        CRATER_COUNT = 6;
         const asteroidIntervalMin = 3000; // Minimum time for asteroid appearances
         const asteroidIntervalMax = 4000; // Maximum time for asteroid appearances
 
@@ -371,7 +373,7 @@
             function resetKeyPressTimer2() {
                 clearTimeout(keyTimeout2); // Clear any existing timeout
                 keyTimeout2 = setTimeout(() => {
-                
+                CRATER_COUNT = 5; // less craters in demo mode for more fun watching
                 topMsg = "Demo mode - any key to return to game mode";
                 demoMode = true;
                 isMuted = true;
@@ -380,6 +382,7 @@
                 }, 17000);
         }
         function drawStatusLine() {
+          
             ctx.font = "34px Arial"; // Set font size and type
             oldVelocityXF = Number(oldVelocityX).toFixed(2);
             oldVelocityYF = Number(oldVelocityY).toFixed(2);
@@ -922,7 +925,7 @@
         let lastTime = 0;
         
         function gameLoop(currentTime) {
-
+            if (!userInteraction) {isMuted = true;}
     		// Calculate the altitude (distance from the bottom of the canvas)
             altitude = canvas.height - landerY - 55; // Lander height from the bottom
 
@@ -1010,6 +1013,7 @@
         }
 
         window.addEventListener('keydown', (e) => {
+            userInteraction = true;
             resetKeyPressTimer(); // Reset the timer on every key press
             resetKeyPressTimer2(); // for after landing/crashing
             demoMode = false;
