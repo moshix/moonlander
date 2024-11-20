@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.7</div>
+        <div>Version: 3.3.8</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -47,12 +47,12 @@
         <div>P............Pause/Unpause</div>
         <div>R............Restart</div>
         <div>M............Mute/Unmute</div>
-        <div>_______________________ </div>
-        <div>2024 by hotdog studios</div>
+        <div>__________________________ </div>
+        <div>(c) by hotdog studios</div>
     </div>
     <script>
 
-        // Copyright 2024 by hot dog studios
+        // Copyright by hot dog studios
         // All rights reserved
         // Moon Lander
         //     a moon lander game with physics as realistics as possible, taken from Apollo 11
@@ -204,7 +204,7 @@
 
         const GRAVITY = 1.62; // Moon gravity in m/s²
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
-        const SIDE_THRUST = 4000; // Apollo lander side thrusters in N
+        const SIDE_THRUST = 4200; // Apollo lander side thrusters in N
         const LANDER_MASS = 15103; // Mass of Apollo 11 lander in kg
         let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, earthX, earthY;
         let commanderX = 0;
@@ -567,11 +567,11 @@
             }
 
             if (isThrustLeft && !isCrashed && !hasLanded) {
-                    ctx.drawImage(thrustleftImg, landerX - 6, landerY +20, 23,23);
+                    ctx.drawImage(thrustleftImg, landerX - 7, landerY +20, 24,24);
                 }
 
                 if (isThrustRight) {
-                    ctx.drawImage(thrustrightImg, landerX +56 , landerY + 20, 23, 23);
+                    ctx.drawImage(thrustrightImg, landerX +57 , landerY + 20, 24, 24);
 
                 }
 
