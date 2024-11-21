@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.4.0</div>
+        <div>Version: 3.5.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -47,7 +47,8 @@
         <div>P............Pause/Unpause</div>
         <div>R............Restart</div>
         <div>M............Mute/Unmute</div>
-        <div>__________________________ </div>
+        <div>T............Asteroid toggle</div
+        <div>____________________________ </div>
         <div>(c) by hotdog studios</div>
     </div>
     <script>
@@ -98,6 +99,7 @@
         // v 3.3.0 entertainment mode if no key pressed for long time
         // v 3.3.1-9 any steering key during autoland, takes out autopilot mode
         // v 3.4.0 fix abhorrent use of animationFrames thruout the game. WTH??
+        // v 3.5.0 the return of the asteroid
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -130,7 +132,7 @@
         issImg.src = 'iss.png';
         
         const asteroidImg = new Image();
-        asteroidImg.src = 'asteroid.svg'; // Load the asteroid image
+        asteroidImg.src = 'asteroid.png'; // Load the asteroid image
         
         const crashedImg = new Image();
         crashedImg.src = 'crashed.svg'; // For crash state
@@ -176,6 +178,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        noAsteroid = false; // if false show asteroid 
         plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
         userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
@@ -201,8 +204,8 @@
         const issOrbitSpeed = 0.00005;
         
         CRATER_COUNT = 6;
-        const asteroidIntervalMin = 3000; // Minimum time for asteroid appearances
-        const asteroidIntervalMax = 4000; // Maximum time for asteroid appearances
+        const asteroidIntervalMin = 7000; // Minimum time for asteroid appearances
+        const asteroidIntervalMax = 12000; // Maximum time for asteroid appearances
 
         const GRAVITY = 1.62; // Moon gravity in m/s²
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
@@ -264,7 +267,7 @@
             velocityX = 0.3;
             accelerationY = GRAVITY;
             accelerationX = 0;
-            fuel = 728;
+            fuel = 528;
             isThrusting = false;
             isThrustLeft = false; // for side thrusters
             isThrustRight = false; // same
@@ -282,7 +285,7 @@
             asteroidStartTime = 0;
             asteroid = null;
             forceManual = false; // reset foce manual
-            //createAsteroid();
+            createAsteroid();
 
             // Random position for earth
             earthsize = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
@@ -487,11 +490,11 @@
 
       function drawAsteroid(timestamp) {
           if (!alTime) alTime = timestamp;
-          const adeltaTime = (timestamp - alTime) / 1000; // convert to seconds
+          const adeltaTime = (timestamp - alTime) / 1300; // convert to seconds
           alTime = timestamp;
       
-          if (asteroid) {
-              ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+          if (asteroid && !noAsteroid) {
+              ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width*1.5, asteroid.height*1.5);
       
               // Move the asteroid based on time elapsed
               asteroid.x += asteroid.speedX * asteroidSpeed * adeltaTime;
@@ -514,7 +517,8 @@
               }
           }
         // Request the next animation frame, passing the current timestamp
-       //requestAnimationFrame(drawAsteroid);
+        cancelAnimationFrame(animationID);
+        animationID = requestAnimationFrame(drawAsteroid);
    }
 
 
@@ -859,7 +863,7 @@
                     bestLandingSpot = false;
                     isThrusting = false;
                     drawLander();
-                    drawAsteroid();
+                    if (!noAsteroid) drawAsteroid();
                     if (!isMuted) crashSound.play();
                     return;
                 }
@@ -1105,11 +1109,8 @@
                     rocketSound.muted = isMuted;
                     crashSound.muted = isMuted;
                     break;
-                case 'KeyS':
-                    isThrusting = false;
-                    isThrustLeft = false;
-                    isThrustRight = false;
-                    forceManual = !forceManual;
+                case 'KeyT':
+                    noAsteroid = !noAsteroid;
                     break;    
                 case 'KeyP':
                     isPaused = !isPaused;
