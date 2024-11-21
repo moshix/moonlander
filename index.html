@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.6.0</div>
+        <div>Version: 3.6.2</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -108,7 +108,6 @@
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        //console.log('canvas height: ', canvas.height);
 
         // Load images
         const landerImg = new Image();
@@ -199,6 +198,9 @@
         let alTime = 0 ; // for asteroid time animation
         const asteroidSpeed = 40; // pixels per second 
         let animationID; 
+        let animationID2;
+        let animationID3;
+        let animationID4;
         let mcdonaldShown = false; // so we can have motivational msg only when arches shown
         const landerWidth = 50;
         const landerHeight = 50;
@@ -254,10 +256,14 @@
         function initializeGame() {
             resetKeyPressTimer();  // to switch to entertainment mode if no key pressed
             resetKeyPressTimer2(); // to restart game after lanidng if no key pressed 5 sec
-           if (animationID) {
+           if (animationID || animationID2 || animationID3) {
             
-           // console.log("animationID: ",animationID);
+          // console.log("animationID: ",animationID);
             cancelAnimationFrame(animationID);
+            cancelAnimationFrame(animationID2);
+            cancelAnimationFrame(animationID3);
+            cancelAnimationFrame(animationID4);
+
            }
 
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
@@ -310,8 +316,8 @@
                 const size = Math.random() * 2;
                 stars.push({ x, y, size });
             }
-            cancelAnimationFrame(animationID);
-            animationID = requestAnimationFrame(gameLoop);
+            cancelAnimationFrame(animationID2);
+            animationID2 = requestAnimationFrame(gameLoop);
 
 
         }
@@ -339,7 +345,7 @@
                     // Left side is safe, proceed to draw
                 } else {
                      mcdonaldShown = false;
-                    //console.log("No suitable position for mcdonald found.");
+
                     return; // Exit if no valid position is found
                 }
             }
@@ -369,7 +375,7 @@
                 if (astronautX >= 0 && isSafeLanding(astronautX, astronautWidth)) {
                     // Left side is safe, proceed to draw
                 } else {
-                    //console.log("No suitable position for astronaut found.");
+                    
                     return; // Exit if no valid position is found
                 }
             }
@@ -521,8 +527,8 @@
               }
           }
         // Request the next animation frame, passing the current timestamp
-        cancelAnimationFrame(animationID);
-        animationID = requestAnimationFrame(drawAsteroid);
+        cancelAnimationFrame(animationID3);
+        animationID3 = requestAnimationFrame(drawAsteroid);
    }
 
             function avoidAsteroid() {
@@ -551,7 +557,7 @@
                         futureAsteroidY < landerY + landerHeight &&
                         futureAsteroidY + asteroid.height > landerY;
 
-                    if (willCollideHorizontally && willCollideVertically) {
+                    if (willCollideHorizontally && willCollideVertically && !noAsteroid) {
                         topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory.";
                         // Apply corrective thrust to avoid future collision
                         if (futureAsteroidX > landerX) {
@@ -651,7 +657,7 @@
         function drawDust() {
             // show dust if approaching moon surface
             if (landerY > canvas.height - 300) {
-                //console.log('in dust height - landerY: ', landerY);
+               
                 ctx.drawImage(leftdustImg, landerX - 64,
                     //canvas.height - 34 - ((canvas.height - landerY) / canvas.height) * (130 - 34),
                     canvas.height - Math.max(30, Math.min(90, 90 - ((canvas.height - landerY) * 0.2))),
@@ -667,7 +673,6 @@
 
 
         function drawEarth() {
-            //console.log('earthsize: ', earthsize); // for debugging...
             ctx.drawImage(earthImg, earthX, earthY, earthsize, earthsize);
         }
 
@@ -726,7 +731,7 @@
             
 
             if (forceManual) {
-                 //console.log(forceManual);
+              
                  landingMode = 'Switched to manual';
                  return;
             }
@@ -1046,8 +1051,8 @@
                 ctx.fillStyle = 'white';
                 ctx.font = '24px monospace';
                 ctx.fillText('Paused', canvas.width / 2 - 50, canvas.height / 2);
-                cancelAnimationFrame(animationID);
-                animationID = requestAnimationFrame(gameLoop); // Continue the loop but skip updates
+                cancelAnimationFrame(animationID4);
+                animationID4 = requestAnimationFrame(gameLoop); // Continue the loop but skip updates
                 return;
             }
 
@@ -1190,7 +1195,6 @@
                 isThrusting = false;
                 isThrustLeft = false;
                 isThrustRight = false;
-                //console.log("Plume hidden on ArrowUp keyup");
                 rocketSound.pause();
             }
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
