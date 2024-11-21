@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.6.2</div>
+        <div>Version: 3.6.3</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -179,6 +179,7 @@
         // Global variables
         /////////////////////////////////////
         noAsteroid = false; // if false show asteroid 
+        asteroidCollisionAlarm = false;
         topMsg = ""; 
         topMsg2 = "";
         plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
@@ -531,58 +532,67 @@
         animationID3 = requestAnimationFrame(drawAsteroid);
    }
 
-            function avoidAsteroid() {
-                // Define the prediction time and granularity
-                const predictionTime = 4; // Predict 3 seconds into the future
-                const timeStep = 0.1; // Use smaller time steps for accurate prediction
 
-                let futureAsteroidX = asteroid.x;
-                let futureAsteroidY = asteroid.y;
+   function avoidAsteroid() {
+    // Define the prediction time and granularity
+    const predictionTime = 4; // Predict 3 seconds into the future
+    const timeStep = 0.05; // Smaller time steps for precise prediction
 
-                // Simulate asteroid position over the prediction time
-                for (let t = 0; t < predictionTime; t += timeStep) {
-                    futureAsteroidX += asteroid.speedX * asteroidSpeed * timeStep;
-                    futureAsteroidY += asteroid.speedY * asteroidSpeed * timeStep;
+    let futureAsteroidX = asteroid.x;
+    let futureAsteroidY = asteroid.y;
+    let futureLanderX = landerX;
+    let futureLanderY = landerY;
 
-                    // Break early if the asteroid goes off-screen
-                    if (futureAsteroidX < -asteroid.width || futureAsteroidX > canvas.width || futureAsteroidY > canvas.height) {
-                        break;
-                    }
+    // Simulate asteroid and lander positions over the prediction time
+    for (let t = 0; t < predictionTime; t += timeStep) {
+        // Predict asteroid's future position
+        futureAsteroidX += asteroid.speedX * asteroidSpeed * timeStep;
+        futureAsteroidY += asteroid.speedY * asteroidSpeed * timeStep;
 
-                    // Check for a future collision with the lander
-                    const willCollideHorizontally =
-                        futureAsteroidX < landerX + landerWidth &&
-                        futureAsteroidX + asteroid.width > landerX;
-                    const willCollideVertically =
-                        futureAsteroidY < landerY + landerHeight &&
-                        futureAsteroidY + asteroid.height > landerY;
+        // Predict lander's future position based on its velocity and acceleration
+        futureLanderX += velocityX * timeStep;
+        futureLanderY += velocityY * timeStep + (0.5 * GRAVITY * timeStep * timeStep); // Include gravity effect
 
-                    if (willCollideHorizontally && willCollideVertically && !noAsteroid) {
-                        topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory.";
-                        // Apply corrective thrust to avoid future collision
-                        if (futureAsteroidX > landerX) {
-                            // Asteroid is predicted to be on the right, move lander to the left
-                            accelerationX = -0.5; // Strong left thrust
-                        } else {
-                            // Asteroid is predicted to be on the left, move lander to the right
-                            accelerationX = 0.5; // Strong right thrust
-                        }
+        // Break early if the asteroid goes off-screen
+        if (futureAsteroidX < -asteroid.width || futureAsteroidX > canvas.width || futureAsteroidY > canvas.height) {
+            break;
+        }
 
-                        if (futureAsteroidY < landerY) {
-                            // Asteroid is above, apply downward thrust if safe
-                            accelerationY = 0.0;
-                        } else {
-                            // Asteroid is below, apply upward thrust
-                            accelerationY = -0.4;
-                        }
-                        
-                        return; // Avoid further calculations once corrective action is taken
-                    }
-                }
+        // Check for a future collision with the lander
+        const willCollideHorizontally =
+            futureAsteroidX < futureLanderX + landerWidth &&
+            futureAsteroidX + asteroid.width > futureLanderX;
+        const willCollideVertically =
+            futureAsteroidY < futureLanderY + landerHeight &&
+            futureAsteroidY + asteroid.height > futureLanderY;
 
-                topMsg2 = " ";
+        if (willCollideHorizontally && willCollideVertically) {
+            asteroidCollisionAlarm = true; // mark we are in collision avoidance mode
+             topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory";
+            // Apply corrective thrust to avoid collision
+            if (futureAsteroidX > futureLanderX) {
+                // Asteroid predicted to be on the right, move lander to the left
+                accelerationX = -0.2; // Strong left thrust
+            } else {
+                // Asteroid predicted to be on the left, move lander to the right
+                accelerationX = 0.2; // Strong right thrust
             }
 
+            if (futureAsteroidY < futureLanderY) {
+                // Asteroid predicted to be above, move lander downward (if safe)
+                accelerationY = 0.1;
+            } else {
+                // Asteroid predicted to be below, move lander upward
+                accelerationY = -5.1;
+            }
+
+            return; // Exit once corrective action is applied
+        }
+    }
+    topMsg2 = ""; // no collision trajectory detected
+    asteroidCollisionAlarm = false; // out of collision danger
+ 
+}
 
 
         function generateCraters() {
@@ -728,147 +738,148 @@
         function autoland() {
             autolandActivated = true;
 
-            
+
 
             if (forceManual) {
-              
-                 landingMode = 'Switched to manual';
-                 return;
-            }
-                // calculate the largest flat landing area
-                    let largestFlatAreaStart = 0;
-                    let largestFlatWidth = 0;
-                    let currentFlatStart = null;
-                    let currentFlatWidth = 0;
 
-        
-                    for (let x = 0; x < canvas.width; x += 5) {
-                        if (isSafeLanding(x, 50)) { // Safe landing spot
-                            if (currentFlatStart === null) {
-                                currentFlatStart = x; // Start new flat area
-                            }
-                            currentFlatWidth += 5; // Expand flat area
-                        } else { // End of flat area
-                            if (currentFlatWidth > largestFlatWidth) {
-                                largestFlatAreaStart = currentFlatStart;
-                                largestFlatWidth = currentFlatWidth;
-                            }
-                            currentFlatStart = null;
-                            currentFlatWidth = 0;
-                        }
+                landingMode = 'Switched to manual';
+                return;
+            }
+            // calculate the largest flat landing area
+            let largestFlatAreaStart = 0;
+            let largestFlatWidth = 0;
+            let currentFlatStart = null;
+            let currentFlatWidth = 0;
+
+
+            for (let x = 0; x < canvas.width; x += 5) {
+                if (isSafeLanding(x, 50)) { // Safe landing spot
+                    if (currentFlatStart === null) {
+                        currentFlatStart = x; // Start new flat area
                     }
-        
-                    if (currentFlatWidth > largestFlatWidth) { // Handle last flat area
+                    currentFlatWidth += 5; // Expand flat area
+                } else { // End of flat area
+                    if (currentFlatWidth > largestFlatWidth) {
                         largestFlatAreaStart = currentFlatStart;
                         largestFlatWidth = currentFlatWidth;
                     }
-        
-                   bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
+                    currentFlatStart = null;
+                    currentFlatWidth = 0;
+                }
+            }
+
+            if (currentFlatWidth > largestFlatWidth) { // Handle last flat area
+                largestFlatAreaStart = currentFlatStart;
+                largestFlatWidth = currentFlatWidth;
+            }
+
+            bestLandingSpot = largestFlatAreaStart + largestFlatWidth / 2; // Center of the largest flat area
 
             // adjust indicated P program according to height
             if (altitude > 600) landingMode = "Autoland P63";
-            if (altitude > 450 && altitude.toFixed(2)< 280 ) landingMode = "Autoland P64";
+            if (altitude > 450 && altitude.toFixed(2) < 280) landingMode = "Autoland P64";
             if (altitude < 270) landingMode = "Autoland P65";
 
-        
+
             // Adjust lateral thrust smoothly toward best landing spot
             const lateralDistance = bestLandingSpot - landerX;
             let maxLateralThrust = 0.20; // Cap the lateral thrust
-            let heightFraction = landerY / (canvas.height -50); // landerY as a fraction of canvas
+            let heightFraction = landerY / (canvas.height - 50); // landerY as a fraction of canvas
             const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
 
             // Cap lateral speed to x m/sec
-           const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
-            
+            const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
+
+
+
+            // this applies less thrust as the lander gets closer to the moon surface
+            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance + 3) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
             // try to avoid asteroid!
             avoidAsteroid();
 
-            // this applies less thrust as the lander gets closer to the moon surface
-            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
-        
-        
-        
-           if (Math.abs(lateralDistance) > 1) {
-                scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
-               if ( Math.abs(velocityX) < maxLateralSpeed) {
-                accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
-               } else {
-                  accelerationX = ( scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
+            if (!asteroidCollisionAlarm) {
+                if (Math.abs(lateralDistance) > 1) {
+                    scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
+                    if (Math.abs(velocityX) < maxLateralSpeed) {
+                        accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
+                    } else {
+                        accelerationX = (scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
 
+                    }
+
+                    if (velocityX > 0.62) { // contrary thrust if not too close to grnd
+
+                        accelerationX = -scaledLateralThrust * 1.33;
+                    }
+
+                    if (velocityX < -0.62) { // contrary thrust if not too close to grnd
+                        accelerationX = scaledLateralThrust * 1.33;
+                    }
+
+
+                    // Set thrust direction based on acceleration
+                    if (accelerationX < 0) {
+                        isThrustLeft = false;;
+                        isThrustRight = true;;
+                    } else if (accelerationX > 0) {
+                        isThrustLeft = true;
+                        isThrustRight = false;;
+                    } else {
+                        isThrustLeft = false;
+                        isThrustRight = false;
+                    }
+
+                } else {
+                    accelerationX = 0; // Stop lateral movement when close enough
+                    isThrustLeft = false;
+                    isThrustRight = false;
                 }
 
-               if (velocityX >  0.62 ){ // contrary thrust if not too close to grnd
-                   
-                    accelerationX = -scaledLateralThrust * 1.33;
-               }
-
-               if (velocityX < -0.62 ){ // contrary thrust if not too close to grnd
-                   accelerationX = scaledLateralThrust * 1.33;
-               }
 
 
-                   // Set thrust direction based on acceleration
-               if (accelerationX < 0) {
-                   isThrustLeft = false;;
-                   isThrustRight = true;;
-               } else if (accelerationX > 0) {
-                   isThrustLeft = true;
-                   isThrustRight = false;;
-               } else {
-                   isThrustLeft = false;
-                   isThrustRight = false;
-               }
 
-            } else {
-                accelerationX = 0; // Stop lateral movement when close enough
-                isThrustLeft = false;
-                isThrustRight = false;
-            }
-
-
-            
-
-
-             // Apply Proportional Vertical Thrust**
-            if (landerY < canvas.height - 60) { // Above ground
-                if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
-                    // Apply upward thrust if descending too fast
-                    if (velocityY > 0.8) {
-                        accelerationY = -0.8 * GRAVITY; // Strong upward thrust to slow descent
-                        isThrusting = true;
-                    } else if (velocityY < 0.5) {
-                        accelerationY = -0.3 * GRAVITY;
-                        isThrusting = true;
-                    } else if (velocityY < 0.2) {
-                        // Minimal thrust for a gentle landing
-                        accelerationY = -0.1 * GRAVITY;
-                        isThrusting = true;
+                // Apply Proportional Vertical Thrust**
+                if (landerY < canvas.height - 60) { // Above ground
+                    if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
+                        // Apply upward thrust if descending too fast
+                        if (velocityY > 0.8) {
+                            accelerationY = -0.8 * GRAVITY; // Strong upward thrust to slow descent
+                            isThrusting = true;
+                        } else if (velocityY < 0.5) {
+                            accelerationY = -0.3 * GRAVITY;
+                            isThrusting = true;
+                        } else if (velocityY < 0.2) {
+                            // Minimal thrust for a gentle landing
+                            accelerationY = -0.1 * GRAVITY;
+                            isThrusting = true;
+                        } else {
+                            accelerationY = -0.00 * GRAVITY; // Let gravity pull the lander down gently
+                            isThrusting = false;
+                        }
                     } else {
-                        accelerationY = -0.00 * GRAVITY; // Let gravity pull the lander down gently
+                        // No upward thrust if the lander is already moving upwards (velocityY <= 0)
+                        accelerationY = 0 * GRAVITY; // Only gravity is applied to pull it down
                         isThrusting = false;
                     }
                 } else {
-                    // No upward thrust if the lander is already moving upwards (velocityY <= 0)
-                    accelerationY = 0 * GRAVITY; // Only gravity is applied to pull it down
-                    isThrusting = false;
-                }
-            } else {
-            
-            if (landerY >= canvas.height - 69) { // On the ground
-                accelerationY = 0;
-                oldVelocityX = velocityX;
-                accelerationX = 0;
-                isThrusting = false;
-                isThrustLeft = false;
-                isThrustRight = false;
-                hasTouchedDown = true
-                //clearTimeout(keyTimeout2); // clear timeout for demo mode
-                checkLanding(true); // Check if landing is successful
-            }
-        }    
-        
-         }
 
+                    if (landerY >= canvas.height - 69) { // On the ground
+                        accelerationY = 0;
+                        oldVelocityX = velocityX;
+                        accelerationX = 0;
+                        isThrusting = false;
+                        isThrustLeft = false;
+                        isThrustRight = false;
+                        hasTouchedDown = true
+                        //clearTimeout(keyTimeout2); // clear timeout for demo mode
+                        checkLanding(true); // Check if landing is successful
+                    }
+                }
+            }
+
+    }
+
+        
         function resetKeyPressTimer() {
             clearTimeout(keyTimeout); // Clear any existing timeout
             keyPressedLongtime = true; // A key has been pressed
