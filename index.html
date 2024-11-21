@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.6.4</div>
+        <div>Version: 3.6.5</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -535,7 +535,7 @@
 
    function avoidAsteroid() {
     // Define the prediction time and granularity
-    const predictionTime = 4; // Predict 3 seconds into the future
+    const predictionTime = 3; // Predict 3 seconds into the future
     const timeStep = 0.05; // Smaller time steps for precise prediction
 
     let futureAsteroidX = asteroid.x;
@@ -560,10 +560,10 @@
 
         // Check for a future collision with the lander
         const willCollideHorizontally =
-            futureAsteroidX < futureLanderX + landerWidth &&
+            futureAsteroidX < futureLanderX + landerWidth+90 &&
             futureAsteroidX + asteroid.width > futureLanderX;
         const willCollideVertically =
-            futureAsteroidY < futureLanderY + landerHeight &&
+            futureAsteroidY < futureLanderY + landerHeight+90 &&
             futureAsteroidY + asteroid.height > futureLanderY;
 
         if (willCollideHorizontally && willCollideVertically && !noAsteroid) {
@@ -572,10 +572,10 @@
             // Apply corrective thrust to avoid collision
             if (futureAsteroidX > futureLanderX) {
                 // Asteroid predicted to be on the right, move lander to the left
-                accelerationX = -1.2; // Strong left thrust
+                accelerationX = -0.5; // Strong left thrust
             } else {
                 // Asteroid predicted to be on the left, move lander to the right
-                accelerationX = 1.2; // Strong right thrust
+                accelerationX = 0.5; // Strong right thrust
             }
 
             if (futureAsteroidY < futureLanderY) {
@@ -583,7 +583,7 @@
                 accelerationY = 0.01;
             } else {
                 // Asteroid predicted to be below, move lander upward
-                accelerationY = -5.1;
+                accelerationY = -3.1;
             }
 
             return; // Exit once corrective action is applied
@@ -794,9 +794,9 @@
 
             // this applies less thrust as the lander gets closer to the moon surface
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance + 3) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
+
             // try to avoid asteroid!
             avoidAsteroid();
-
             if (!asteroidCollisionAlarm) {
                 if (Math.abs(lateralDistance) > 1) {
                     scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
