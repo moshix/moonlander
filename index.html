@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.9</div>
+        <div>Version: 3.3.9.1</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -699,12 +699,12 @@
 
                 }
 
-               if (velocityX >  0.50 ){ // contrary thrust if not too close to grnd
+               if (velocityX >  0.62 ){ // contrary thrust if not too close to grnd
                    
                     accelerationX = -scaledLateralThrust * 1.33;
                }
 
-               if (velocityX < -0.50 ){ // contrary thrust if not too close to grnd
+               if (velocityX < -0.62 ){ // contrary thrust if not too close to grnd
                    accelerationX = scaledLateralThrust * 1.33;
                }
 
