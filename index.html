@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.3.9.1</div>
+        <div>Version: 3.4.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -97,6 +97,7 @@
         // v 3.2.0 fix various stuff and code cleanup
         // v 3.3.0 entertainment mode if no key pressed for long time
         // v 3.3.1-9 any steering key during autoland, takes out autopilot mode
+        // v 3.4.0 fix abhorrent use of animationFrames thruout the game. WTH??
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -175,6 +176,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
         userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
         demoMode = false; // are we in demo mode?
@@ -246,8 +248,11 @@
         function initializeGame() {
             resetKeyPressTimer();  // to switch to entertainment mode if no key pressed
             resetKeyPressTimer2(); // to restart game after lanidng if no key pressed 5 sec
-           if (animationID) cancelAnimationFrame(animationID);
-         
+           if (animationID) {
+            
+           // console.log("animationID: ",animationID);
+            cancelAnimationFrame(animationID);
+           }
 
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
           
@@ -284,9 +289,8 @@
             earthX = Math.random() * (canvas.width - 100);
             earthY = Math.random() * (canvas.height / 2);
 
-            // Random position for Saturn
-            planet1X = Math.random() * (canvas.width - 100);
-            planet1Y = Math.random() * (canvas.height / 2);
+            randomPlanet1(); // put saturn (planet1Img) on canvas without overlapping earthImg
+
 
             // Redraw craters and stars
             craters.length = 0;
@@ -300,7 +304,7 @@
                 const size = Math.random() * 2;
                 stars.push({ x, y, size });
             }
-
+            cancelAnimationFrame(animationID);
             animationID = requestAnimationFrame(gameLoop);
 
 
@@ -510,7 +514,7 @@
               }
           }
         // Request the next animation frame, passing the current timestamp
-       requestAnimationFrame(drawAsteroid);
+       //requestAnimationFrame(drawAsteroid);
    }
 
 
@@ -618,9 +622,35 @@
             }
         }
 
+  //      function drawPlanet1() {
+  //          // Random position for Saturn
+  //          planet1X = Math.random() * (canvas.width - 100);
+  //          planet1Y = Math.random() * (canvas.height / 2);
+//
+ //           ctx.drawImage(planet1Img, planet1X, planet1Y, 60, 60);
+  //      }
+
+        function randomPlanet1() {
+
+                 // Generate random positions for planet1
+                plDistance = 100; // force while loop 
+                while (plDistance < 200){
+                planet1X = Math.random() * (canvas.width - 100);
+                planet1Y = Math.random() * (canvas.height / 2);
+
+                // Calculate the distance from planet1 to Earth
+                plDistance = Math.sqrt(Math.pow(planet1X - earthX, 2) + Math.pow(planet1Y - earthY, 2));
+
+                 }
+
+        }
+
         function drawPlanet1() {
+            // Draw the planet
             ctx.drawImage(planet1Img, planet1X, planet1Y, 60, 60);
         }
+
+
 
         function drawISS(currentTime) {
             const orbitRadius = issOrbitRadius;
@@ -951,7 +981,8 @@
                 ctx.fillStyle = 'white';
                 ctx.font = '24px monospace';
                 ctx.fillText('Paused', canvas.width / 2 - 50, canvas.height / 2);
-                requestAnimationFrame(gameLoop); // Continue the loop but skip updates
+                cancelAnimationFrame(animationID);
+                animationID = requestAnimationFrame(gameLoop); // Continue the loop but skip updates
                 return;
             }
 
@@ -1015,8 +1046,8 @@
             displayMode();
 
 			drawStatusLine();
-
-            requestAnimationFrame(gameLoop);
+            cancelAnimationFrame(animationID);
+            animationID = requestAnimationFrame(gameLoop);
         }
 
         window.addEventListener('keydown', (e) => {
@@ -1086,7 +1117,7 @@
                         landingMode = 'Paused';
                     } else {
                         landingMode = autolandActivated ? 'Autoland Mode' : 'Manual Land';
-                        requestAnimationFrame(gameLoop);
+                       //requestAnimationFrame(gameLoop);
                     }
                     break;
             }
