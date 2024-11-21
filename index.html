@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.5.1</div>
+        <div>Version: 3.6.0</div>
         <div>Altitude: <span id="altitude">0</span> m</div>
         <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
@@ -98,8 +98,9 @@
         // v 3.2.0 fix various stuff and code cleanup
         // v 3.3.0 entertainment mode if no key pressed for long time
         // v 3.3.1-9 any steering key during autoland, takes out autopilot mode
-        // v 3.4.0 fix abhorrent use of animationFrames thruout the game. WTH??
+        // v 3.4.0 fix abhorrent use of animationFrames thrughout the game. WTH??
         // v 3.5.0 the return of the asteroid
+        // v 3.6.0 in autoland, the lander AGC will predict the asteroid trajectory and try to avoid it
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -179,6 +180,8 @@
         // Global variables
         /////////////////////////////////////
         noAsteroid = false; // if false show asteroid 
+        topMsg = ""; 
+        topMsg2 = "";
         plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
         userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
@@ -511,7 +514,8 @@
                   asteroid.x < landerX + 50 &&
                   asteroid.x + asteroid.width > landerX &&
                   asteroid.y < landerY + 50 &&
-                  asteroid.y + asteroid.height > landerY
+                  asteroid.y + asteroid.height > landerY &&
+                  landerY >> 100
               ) {
                   isCrashed = true;
               }
@@ -520,6 +524,58 @@
         cancelAnimationFrame(animationID);
         animationID = requestAnimationFrame(drawAsteroid);
    }
+
+            function avoidAsteroid() {
+                // Define the prediction time and granularity
+                const predictionTime = 4; // Predict 3 seconds into the future
+                const timeStep = 0.1; // Use smaller time steps for accurate prediction
+
+                let futureAsteroidX = asteroid.x;
+                let futureAsteroidY = asteroid.y;
+
+                // Simulate asteroid position over the prediction time
+                for (let t = 0; t < predictionTime; t += timeStep) {
+                    futureAsteroidX += asteroid.speedX * asteroidSpeed * timeStep;
+                    futureAsteroidY += asteroid.speedY * asteroidSpeed * timeStep;
+
+                    // Break early if the asteroid goes off-screen
+                    if (futureAsteroidX < -asteroid.width || futureAsteroidX > canvas.width || futureAsteroidY > canvas.height) {
+                        break;
+                    }
+
+                    // Check for a future collision with the lander
+                    const willCollideHorizontally =
+                        futureAsteroidX < landerX + landerWidth &&
+                        futureAsteroidX + asteroid.width > landerX;
+                    const willCollideVertically =
+                        futureAsteroidY < landerY + landerHeight &&
+                        futureAsteroidY + asteroid.height > landerY;
+
+                    if (willCollideHorizontally && willCollideVertically) {
+                        topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory.";
+                        // Apply corrective thrust to avoid future collision
+                        if (futureAsteroidX > landerX) {
+                            // Asteroid is predicted to be on the right, move lander to the left
+                            accelerationX = -0.5; // Strong left thrust
+                        } else {
+                            // Asteroid is predicted to be on the left, move lander to the right
+                            accelerationX = 0.5; // Strong right thrust
+                        }
+
+                        if (futureAsteroidY < landerY) {
+                            // Asteroid is above, apply downward thrust if safe
+                            accelerationY = 0.0;
+                        } else {
+                            // Asteroid is below, apply upward thrust
+                            accelerationY = -0.4;
+                        }
+                        
+                        return; // Avoid further calculations once corrective action is taken
+                    }
+                }
+
+                topMsg2 = " ";
+            }
 
 
 
@@ -719,6 +775,9 @@
             // Cap lateral speed to x m/sec
            const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
             
+            // try to avoid asteroid!
+            avoidAsteroid();
+
             // this applies less thrust as the lander gets closer to the moon surface
             let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance +3 ) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
         
@@ -958,7 +1017,9 @@
                 ctx.fillStyle = "crimson";
                 ctx.textAlign = "center";
                 ctx.fillText(topMsg, canvas.width /2, 40);
-                ctx.font = "19px Arial"; 
+                ctx.fillStyle = "Yellow";
+                ctx.fillText(topMsg2,canvas.width /2, 65 )
+                ctx.font = "25px Arial"; 
             }
         }
 
