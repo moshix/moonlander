@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.0</div>
+        <div>Version..............3.7.1</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -44,7 +44,7 @@
     </div>
     <div id="legend">
         <div>cursor keys..Impulse steering </div>
-        <div>A:...........Autoland</div>
+        <div>A:...........Autopilot</div>
         <div>P............Pause/Unpause</div>
         <div>R............Restart</div>
         <div>M............Mute/Unmute</div>
@@ -573,45 +573,45 @@
         
         if (willCollideHorizontally && willCollideVertically && !noAsteroid) {
             asteroidCollisionAlarm = true; // mark we are in collision avoidance mode
-             topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory";
+             topMsg2 = " ";
             // Apply corrective thrust to avoid collision
             if (futureAsteroidX > futureLanderX) {
                 // Asteroid predicted to be on the right, move lander to the right
-                sideMsg = "Right -0.5m/s";
+                sideMsg = "ASTEROID!";
                 setTimeout(() => {
-                    sideMsg = "none";
+                    sideMsg = " ";
                     sideMsgElement.textContent = setMsg; 
-                }, 600);
+                }, 800);
                 velocityX = velocityX /4; isThrusting = true;
                 accelerationX = 0.5; // Strong left thrust
             } else {
                 // Asteroid predicted to be on the left, move lander to the right
-                sideMsg = "Left 0.5m/s";
+                sideMsg = "ASTEROID";
                 setTimeout(() => {
-                    sideMsg = "none";
+                    sideMsg = " ";
                     sideMsgElement.textContent = setMsg; 
-                }, 600);                
+                }, 800);                
                 velocityX = velocityX / 4; isThrusting = true;
                 accelerationX = -0.5; // Strong right thrust
             }
 
             if (futureAsteroidY < futureLanderY && landerY > canvas.height - 200) {
                 // Asteroid predicted to be above, move lander downward (if safe)
-                sideMsg = "Down 0.01m/s";
+                sideMsg = "ASTEROID";
                  setTimeout(() => {
-                    sideMsg = "none";
+                    sideMsg = " ";
                     sideMsgElement.textContent = setMsg; 
-                }, 600);               
+                }, 800);               
                 isThrusting = true;
                 accelerationY = 0.02; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
                 velocityY = -0.1; // softly slow down before going up (minus means upwards)
-                sideMsg = "Up 3.1m/s"; isThrusting = true;
+                sideMsg = "ASTEROID"; isThrusting = true;
                 setTimeout(() => {
-                    sideMsg = "none";
+                    sideMsg = " ";
                     sideMsgElement.textContent = setMsg; 
-                }, 600);                
+                }, 800);                
                 accelerationY = -1.1; velocityY = -0.4;
             }
             
@@ -884,7 +884,7 @@
                     
                 }
                 else {
-                    sideMsg = "none";
+                    // sideMsg = " ";
                     //sideMsgElement.textContent = setMsg;
                     avoidTerrain = false;
                     //accelerationY = accelerationY / 1.2; // reduce upward trust
