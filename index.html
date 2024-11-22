@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.6.9</div>
+        <div>Version..............3.7.0</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -102,6 +102,7 @@
         // v 3.4.0 fix abhorrent use of animationFrames thrughout the game. WTH??
         // v 3.5.0 the return of the asteroid
         // v 3.6.0 in autoland, the lander AGC will predict the asteroid trajectory and try to avoid it
+        // v 3.7.0 don't get too close to ground before being over target area in autoland
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -179,6 +180,7 @@
         /////////////////////////////////////
         // Global variables
         /////////////////////////////////////
+        avoidTerrain = false; // in terrain avoidance mode? no by default
         noAsteroid = false; // if false show asteroid 
         asteroidCollisionAlarm = false;
         topMsg = ""; // for asteroid collision message
@@ -524,7 +526,8 @@
                   asteroid.x + asteroid.width > landerX &&
                   asteroid.y < landerY + 50 &&
                   asteroid.y + asteroid.height > landerY &&
-                  landerY >> 100
+                  landerY >> 100 &&
+                  !hasLanded
               ) {
                   isCrashed = true;
               }
@@ -578,7 +581,7 @@
                 setTimeout(() => {
                     sideMsg = "none";
                     sideMsgElement.textContent = setMsg; 
-                }, 500);
+                }, 600);
                 velocityX = velocityX /4; isThrusting = true;
                 accelerationX = 0.5; // Strong left thrust
             } else {
@@ -587,7 +590,7 @@
                 setTimeout(() => {
                     sideMsg = "none";
                     sideMsgElement.textContent = setMsg; 
-                }, 500);                
+                }, 600);                
                 velocityX = velocityX / 4; isThrusting = true;
                 accelerationX = -0.5; // Strong right thrust
             }
@@ -598,7 +601,7 @@
                  setTimeout(() => {
                     sideMsg = "none";
                     sideMsgElement.textContent = setMsg; 
-                }, 500);               
+                }, 600);               
                 isThrusting = true;
                 accelerationY = 0.02; velocityY = 0.6;
             } else {
@@ -608,7 +611,7 @@
                 setTimeout(() => {
                     sideMsg = "none";
                     sideMsgElement.textContent = setMsg; 
-                }, 500);                
+                }, 600);                
                 accelerationY = -1.1; velocityY = -0.4;
             }
             
@@ -862,11 +865,34 @@
                     isThrustRight = false;
                 }
 
-
+               
+                // if too close too ground and too far from best landing spot, then go up a bit
+                //console.log ("landerY / canvas.height -200: ", landerY, "/ ",canvas.height-200);
+                //console.log("Lateraldistance: ", lateralDistance);
+                if (( landerY >  canvas.height -210)  && ( Math.abs(lateralDistance) > 250) ) {
+                    sideMsg = "TERRAIN!"
+                    //sideMsgElement.textContent = setMsg;
+                    
+                    avoidTerrain = true;
+                    velocityY = -0.2; // go up
+                
+                    accelerationY = -1.5; 
+                    accelerationX = 0.03 * Math.sign(lateralDistance);
+                    isThrusting = true;
+                    isThrustRight = true;
+                    isThrustLeft = true;
+                    
+                }
+                else {
+                    sideMsg = "none";
+                    //sideMsgElement.textContent = setMsg;
+                    avoidTerrain = false;
+                    //accelerationY = accelerationY / 1.2; // reduce upward trust
+                }
 
 
                 // Apply Proportional Vertical Thrust**
-                if (landerY < canvas.height - 60) { // Above ground
+                if (landerY < canvas.height - 60 && !avoidTerrain) { // Above ground
                     if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
                         // Apply upward thrust if descending too fast
                         if (velocityY > 0.8) {
