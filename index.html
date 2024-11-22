@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.1</div>
+        <div>Version..............3.7.2</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -869,6 +869,7 @@
                 // if too close too ground and too far from best landing spot, then go up a bit
                 //console.log ("landerY / canvas.height -200: ", landerY, "/ ",canvas.height-200);
                 //console.log("Lateraldistance: ", lateralDistance);
+                // v 3.7.0 feature
                 if (( landerY >  canvas.height -210)  && ( Math.abs(lateralDistance) > 250) ) {
                     sideMsg = "TERRAIN!"
                     //sideMsgElement.textContent = setMsg;
@@ -887,7 +888,7 @@
                     // sideMsg = " ";
                     //sideMsgElement.textContent = setMsg;
                     avoidTerrain = false;
-                    //accelerationY = accelerationY / 1.2; // reduce upward trust
+
                 }
 
 
@@ -896,10 +897,10 @@
                     if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
                         // Apply upward thrust if descending too fast
                         if (velocityY > 0.8) {
-                            accelerationY = -0.8 * GRAVITY; // Strong upward thrust to slow descent
+                            accelerationY = -1.1 * GRAVITY; // Strong upward thrust to slow descent
                             isThrusting = true;
                         } else if (velocityY < 0.5) {
-                            accelerationY = -0.3 * GRAVITY;
+                            accelerationY = -0.5 * GRAVITY;
                             isThrusting = true;
                         } else if (velocityY < 0.2) {
                             // Minimal thrust for a gentle landing
