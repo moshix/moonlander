@@ -33,14 +33,14 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.6.7</div>
+        <div>Version..............3.6.8</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
-        <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/xs</div>
+        <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
         <div>Acceleration.........<span id="acceleration">0</span> m/s²</div>
-        <div>Fuel remaining...... <span id="fuel">1000</span> kg</div>
+        <div>Fuel remaining...... <span id="fuel">500</span> kg</div>
         <div>Fuel Consumption.....<span id="consumption">0</span> kg/s</div>
-        <div>Collision Avoidance..<span id="sideMsg"> </span></div>
+        <div>Collision Avoidance..<span id="sideMsg">none</span></div>
     </div>
     <div id="legend">
         <div>cursor keys..Impulse steering </div>
@@ -183,7 +183,7 @@
         asteroidCollisionAlarm = false;
         topMsg = ""; // for asteroid collision message
         topMsg2 = "";
-        sideMsg = " "; // displays avoidance strategy on the right side of canvas
+        sideMsg = "none"; // displays avoidance strategy on the right side of canvas
         plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
         userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
@@ -356,7 +356,7 @@
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
             ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-38, astronautWidth * 3.5, astronautHeight * 7);
-            ctx.drawImage(roverImg, mcdonaldX + 94, astronautY , astronautWidth *2.2, astronautHeight * 2.2);
+            ctx.drawImage(roverImg, mcdonaldX + 94, astronautY-3 , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
@@ -591,7 +591,7 @@
                 accelerationY = 0.01; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
-                sideMsg = "Up 10.1m/s"; isThrusting = true;
+                sideMsg = "Up 3.1m/s"; isThrusting = true;
                 accelerationY = -3.1; velocityY = -1.4;
             }
 
@@ -599,7 +599,6 @@
         }
     }
     topMsg2 = ""; // no collision trajectory detected\
-    sideMsg = " ";
     asteroidCollisionAlarm = false; // out of collision danger
  
 }
@@ -1060,7 +1059,7 @@
     		// Calculate the altitude (distance from the bottom of the canvas)
             altitude = canvas.height - landerY - 55; // Lander height from the bottom
             
-
+           sideMsg = "none;"
             // Update the stats in the HTML
             document.getElementById('altitude').textContent = altitude.toFixed(2);
             document.getElementById('verticalSpeed').textContent = velocityY.toFixed(2);
