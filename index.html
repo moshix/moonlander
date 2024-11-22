@@ -33,13 +33,14 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.6.8</div>
+        <div>Version..............3.6.9</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
         <div>Acceleration.........<span id="acceleration">0</span> m/s²</div>
         <div>Fuel remaining...... <span id="fuel">500</span> kg</div>
         <div>Fuel Consumption.....<span id="consumption">0</span> kg/s</div>
+        <div>Collision avoidance..<span id="sideMsg"> </span></div>
     </div>
     <div id="legend">
         <div>cursor keys..Impulse steering </div>
@@ -574,11 +575,19 @@
             if (futureAsteroidX > futureLanderX) {
                 // Asteroid predicted to be on the right, move lander to the right
                 sideMsg = "Right -0.5m/s";
+                setTimeout(() => {
+                    sideMsg = "none";
+                    sideMsgElement.textContent = setMsg; 
+                }, 500);
                 velocityX = velocityX /4; isThrusting = true;
                 accelerationX = 0.5; // Strong left thrust
             } else {
                 // Asteroid predicted to be on the left, move lander to the right
                 sideMsg = "Left 0.5m/s";
+                setTimeout(() => {
+                    sideMsg = "none";
+                    sideMsgElement.textContent = setMsg; 
+                }, 500);                
                 velocityX = velocityX / 4; isThrusting = true;
                 accelerationX = -0.5; // Strong right thrust
             }
@@ -586,20 +595,29 @@
             if (futureAsteroidY < futureLanderY && landerY > canvas.height - 200) {
                 // Asteroid predicted to be above, move lander downward (if safe)
                 sideMsg = "Down 0.01m/s";
+                 setTimeout(() => {
+                    sideMsg = "none";
+                    sideMsgElement.textContent = setMsg; 
+                }, 500);               
                 isThrusting = true;
-                accelerationY = 0.01; velocityY = 0.6;
+                accelerationY = 0.02; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
-                velocityY = -0.1
+                velocityY = -0.1; // softly slow down before going up (minus means upwards)
                 sideMsg = "Up 3.1m/s"; isThrusting = true;
-                accelerationY = -3.1; velocityY = -0.5;
+                setTimeout(() => {
+                    sideMsg = "none";
+                    sideMsgElement.textContent = setMsg; 
+                }, 500);                
+                accelerationY = -1.1; velocityY = -0.4;
             }
-
+            
             return; // Exit once corrective action is applied
         }
     }
-    topMsg2 = ""; // no collision trajectory detected\
+    topMsg2 = ""; // no collision trajectory detected
     asteroidCollisionAlarm = false; // out of collision danger
+
  
 }
 
@@ -897,6 +915,8 @@
                     
                 if (!isCrashed || !hasLanded) {
                     topMsg = "Autopilot engaged - cursor keys to land manually";
+                    
+
                 } else {
                     topMsg = "";
                 }
@@ -1048,7 +1068,7 @@
                 ctx.font = "16px Arial";
                 ctx.fillStyle = "white";
                 ctx.textAlign = 'right';
-               // ctx.fillText(sideMsg, canvas.width -40,140)
+             
             }
         }
 
@@ -1059,7 +1079,7 @@
     		// Calculate the altitude (distance from the bottom of the canvas)
             altitude = canvas.height - landerY - 55; // Lander height from the bottom
             
-           sideMsg = "none;"
+        
             // Update the stats in the HTML
             document.getElementById('altitude').textContent = altitude.toFixed(2);
             document.getElementById('verticalSpeed').textContent = velocityY.toFixed(2);
@@ -1067,7 +1087,9 @@
             document.getElementById('acceleration').textContent = (Math.abs(accelerationY) + Math.abs(accelerationX)).toFixed(2);
             document.getElementById('fuel').textContent = fuel.toFixed(2);
             document.getElementById('consumption').textContent = isThrusting ? (5).toFixed(2) : (0).toFixed(2); // Fuel consumption during thrust
-           // document.getElementById('sideMsg');
+            const sideMsgElement = document.getElementById('sideMsg'); 
+            sideMsgElement.textContent = sideMsg;
+
             if (!lastTime) lastTime = currentTime;
             const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
