@@ -40,7 +40,6 @@
         <div>Acceleration.........<span id="acceleration">0</span> m/s²</div>
         <div>Fuel remaining...... <span id="fuel">500</span> kg</div>
         <div>Fuel Consumption.....<span id="consumption">0</span> kg/s</div>
-        <div>Collision Avoidance..<span id="sideMsg">none</span></div>
     </div>
     <div id="legend">
         <div>cursor keys..Impulse steering </div>
@@ -591,8 +590,9 @@
                 accelerationY = 0.01; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
+                velocityY = -0.1
                 sideMsg = "Up 3.1m/s"; isThrusting = true;
-                accelerationY = -3.1; velocityY = -1.4;
+                accelerationY = -3.1; velocityY = -0.5;
             }
 
             return; // Exit once corrective action is applied
@@ -1067,7 +1067,7 @@
             document.getElementById('acceleration').textContent = (Math.abs(accelerationY) + Math.abs(accelerationX)).toFixed(2);
             document.getElementById('fuel').textContent = fuel.toFixed(2);
             document.getElementById('consumption').textContent = isThrusting ? (5).toFixed(2) : (0).toFixed(2); // Fuel consumption during thrust
-            document.getElementById('sideMsg');
+           // document.getElementById('sideMsg');
             if (!lastTime) lastTime = currentTime;
             const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
