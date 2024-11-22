@@ -33,13 +33,14 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version: 3.6.6</div>
-        <div>Altitude: <span id="altitude">0</span> m</div>
-        <div>Vertical Speed: <span id="verticalSpeed">0</span> m/s</div>
-        <div>Lateral Speed: <span id="lateralSpeed">0</span> m/s</div>
-        <div>Acceleration: <span id="acceleration">0</span> m/s²</div>
-        <div>Fuel: <span id="fuel">1000</span> kg</div>
-        <div>Fuel Consumption: <span id="consumption">0</span> kg/s</div>
+        <div>Version..............3.6.7</div>
+        <div>Altitude.............<span id="altitude">0</span> m</div>
+        <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/xs</div>
+        <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
+        <div>Acceleration.........<span id="acceleration">0</span> m/s²</div>
+        <div>Fuel remaining...... <span id="fuel">1000</span> kg</div>
+        <div>Fuel Consumption.....<span id="consumption">0</span> kg/s</div>
+        <div>Collision Avoidance..<span id="sideMsg"> </span></div>
     </div>
     <div id="legend">
         <div>cursor keys..Impulse steering </div>
@@ -180,8 +181,9 @@
         /////////////////////////////////////
         noAsteroid = false; // if false show asteroid 
         asteroidCollisionAlarm = false;
-        topMsg = ""; 
+        topMsg = ""; // for asteroid collision message
         topMsg2 = "";
+        sideMsg = " "; // displays avoidance strategy on the right side of canvas
         plDistance = 300; // distance between planet1Img and earthImg (so they don't overlap)
         userInteraction = false;
         topMsg = "Demo mode - any key to return to game mode";
@@ -209,7 +211,7 @@
         const planet1OrbitSpeed = 0.00001;
         const issOrbitSpeed = 0.00005;
         
-        CRATER_COUNT = 6;
+        CRATER_COUNT = 5;
         const asteroidIntervalMin = 7000; // Minimum time for asteroid appearances
         const asteroidIntervalMax = 12000; // Maximum time for asteroid appearances
 
@@ -353,8 +355,8 @@
         
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
-            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-42, astronautWidth * 3.2, astronautHeight * 6);
-            ctx.drawImage(roverImg, mcdonaldX + 84, astronautY , astronautWidth *2.2, astronautHeight * 2.2);
+            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-38, astronautWidth * 3.5, astronautHeight * 7);
+            ctx.drawImage(roverImg, mcdonaldX + 94, astronautY , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
@@ -396,7 +398,7 @@
                 isMuted = true;
                 initializeGame(); // Restart the game after 5 seconds of no key press
                     
-                }, 17000);
+                }, 21000);
         }
         function drawStatusLine() {
           
@@ -504,7 +506,7 @@
           alTime = timestamp;
       
           if (asteroid && !noAsteroid) {
-              ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width*1.5, asteroid.height*1.5);
+              ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width*1.3, asteroid.height*1.3);
       
               // Move the asteroid based on time elapsed
               asteroid.x += asteroid.speedX * asteroidSpeed * adeltaTime;
@@ -565,31 +567,39 @@
         const willCollideVertically =
             futureAsteroidY < futureLanderY + landerHeight+90 &&
             futureAsteroidY + asteroid.height > futureLanderY;
-
+        
         if (willCollideHorizontally && willCollideVertically && !noAsteroid) {
             asteroidCollisionAlarm = true; // mark we are in collision avoidance mode
              topMsg2 = "Asteroid collision detected. Calculating avoidance trajectory";
             // Apply corrective thrust to avoid collision
             if (futureAsteroidX > futureLanderX) {
-                // Asteroid predicted to be on the right, move lander to the left
-                accelerationX = -0.5; // Strong left thrust
+                // Asteroid predicted to be on the right, move lander to the right
+                sideMsg = "Right -0.5m/s";
+                velocityX = velocityX /4; isThrusting = true;
+                accelerationX = 0.5; // Strong left thrust
             } else {
                 // Asteroid predicted to be on the left, move lander to the right
-                accelerationX = 0.5; // Strong right thrust
+                sideMsg = "Left 0.5m/s";
+                velocityX = velocityX / 4; isThrusting = true;
+                accelerationX = -0.5; // Strong right thrust
             }
 
-            if (futureAsteroidY < futureLanderY) {
+            if (futureAsteroidY < futureLanderY && landerY > canvas.height - 200) {
                 // Asteroid predicted to be above, move lander downward (if safe)
-                accelerationY = 0.01;
+                sideMsg = "Down 0.01m/s";
+                isThrusting = true;
+                accelerationY = 0.01; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
-                if (landerY - canvas.height > 300) accelerationY = -7.1;
+                sideMsg = "Up 10.1m/s"; isThrusting = true;
+                accelerationY = -3.1; velocityY = -1.4;
             }
 
             return; // Exit once corrective action is applied
         }
     }
-    topMsg2 = ""; // no collision trajectory detected
+    topMsg2 = ""; // no collision trajectory detected\
+    sideMsg = " ";
     asteroidCollisionAlarm = false; // out of collision danger
  
 }
@@ -1032,10 +1042,14 @@
             if (demoMode){
                 ctx.fillStyle = "crimson";
                 ctx.textAlign = "center";
-                ctx.fillText(topMsg, canvas.width /2, 40);
+                ctx.font = "23px Arial";
+                ctx.fillText(topMsg, canvas.width /2, 20);
                 ctx.fillStyle = "Yellow";
-                ctx.fillText(topMsg2,canvas.width /2, 65 )
-                ctx.font = "25px Arial"; 
+                ctx.fillText(topMsg2,canvas.width /2, 40 )
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "white";
+                ctx.textAlign = 'right';
+               // ctx.fillText(sideMsg, canvas.width -40,140)
             }
         }
 
@@ -1045,6 +1059,7 @@
             if (!userInteraction) {isMuted = true;}
     		// Calculate the altitude (distance from the bottom of the canvas)
             altitude = canvas.height - landerY - 55; // Lander height from the bottom
+            
 
             // Update the stats in the HTML
             document.getElementById('altitude').textContent = altitude.toFixed(2);
@@ -1053,7 +1068,7 @@
             document.getElementById('acceleration').textContent = (Math.abs(accelerationY) + Math.abs(accelerationX)).toFixed(2);
             document.getElementById('fuel').textContent = fuel.toFixed(2);
             document.getElementById('consumption').textContent = isThrusting ? (5).toFixed(2) : (0).toFixed(2); // Fuel consumption during thrust
-
+            document.getElementById('sideMsg');
             if (!lastTime) lastTime = currentTime;
             const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
@@ -1219,5 +1234,6 @@
         initializeGame();
 
     </script>
+
 </body>
 </html>
