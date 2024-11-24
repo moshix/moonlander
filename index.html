@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.3</div>
+        <div>Version..............3.7.4</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -1213,7 +1213,8 @@
                         accelerationX = -SIDE_THRUST / LANDER_MASS;
                         isThrustLeft = false;
                         isThrustRight = true;
-                        isThrusting = false;
+                        isThrusting = true;
+                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
                     }
                     break;
                 case 'ArrowRight':
@@ -1223,7 +1224,8 @@
                         accelerationX = SIDE_THRUST / LANDER_MASS;
                         isThrustRight = false;
                         isThrustLeft = true;
-                        isThrusting = false;
+                        isThrusting = true;
+                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
                     }
                     break;
                 case 'ArrowUp':
