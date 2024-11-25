@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.4</div>
+        <div>Version..............3.7.5</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -595,7 +595,7 @@
                 accelerationX = -0.5; // Strong right thrust
             }
 
-            if (futureAsteroidY < futureLanderY && landerY > canvas.height - 200) {
+            if (futureAsteroidY < futureLanderY) {
                 // Asteroid predicted to be above, move lander downward (if safe)
                 sideMsg = "ASTEROID";
                  setTimeout(() => {
@@ -603,7 +603,7 @@
                     sideMsgElement.textContent = setMsg; 
                 }, 800);               
                 isThrusting = true;
-                accelerationY = 0.02; velocityY = 0.6;
+                accelerationY = 0.04; velocityY = 0.6;
             } else {
                 // Asteroid predicted to be below, move lander upward
                 velocityY = -0.1; // softly slow down before going up (minus means upwards)
