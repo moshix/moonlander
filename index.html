@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.5</div>
+        <div>Version..............3.7.6</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -253,7 +253,6 @@
 	         if (isMobile()) {
 	            createAutolandButton(); // Show the autoland button
                 createRestartButton();
-	            CRATER_COUNT = 2; // fewer craters on mobile
 	             }
           };
 
@@ -310,6 +309,11 @@
 
 
             // Redraw craters and stars
+            if (isMobile) {
+                CRATER_COUNT = 3;
+            } else {
+                CRATER_COUNT = 5;
+            }
             craters.length = 0;
             generateCraters();
 
@@ -394,7 +398,7 @@
             function resetKeyPressTimer2() {
                 clearTimeout(keyTimeout2); // Clear any existing timeout
                 keyTimeout2 = setTimeout(() => {
-                CRATER_COUNT = 5; // less craters in demo mode for more fun watching
+                //CRATER_COUNT = 5; // less craters in demo mode for more fun watching
                 topMsg = "Demo mode - any key to return to game mode";
                 demoMode = true;
                 isMuted = true;
@@ -920,9 +924,9 @@
                 //sideMsgElement.textContent = setMsg;
 
                 avoidTerrain = true;
-                velocityY = -0.2; // go up
+                velocityY = -0.1; // go up
 
-                accelerationY = -1.5;
+                accelerationY = -0.8;
                 accelerationX = 0.03 * Math.sign(lateralDistance);
                 isThrusting = true;
                 isThrustRight = true;
