@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.9</div>
+        <div>Version..............3.8.0</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -49,7 +49,8 @@
         <div>R............Restart</div>
         <div>M............Mute/Unmute</div>
         <div>T............Asteroid toggle</div>
-        <div>______________________________ </div>
+        <div>+ -..........Add/reduce craters</div>
+        <div>_______________________________ </div>
         <div>(c) by hotdog studios</div>
     </div>
     <script>
@@ -103,6 +104,7 @@
         // v 3.5.0 the return of the asteroid
         // v 3.6.0 in autoland, the lander AGC will predict the asteroid trajectory and try to avoid it
         // v 3.7.0 don't get too close to ground before being over target area in autoland
+        // v 3.8.0 Let users add or reduce amount of craters
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -213,7 +215,7 @@
         const planet1OrbitSpeed = 0.00001;
         const issOrbitSpeed = 0.00005;
         
-        CRATER_COUNT = 5;
+        CRATER_COUNT = 4;
         const asteroidIntervalMin = 7000; // Minimum time for asteroid appearances
         const asteroidIntervalMax = 12000; // Maximum time for asteroid appearances
 
@@ -307,13 +309,6 @@
 
             randomPlanet1(); // put saturn (planet1Img) on canvas without overlapping earthImg
 
-
-            // Redraw craters and stars
-            if (isMobile) {
-                CRATER_COUNT = 3;
-            } else {
-                CRATER_COUNT = 5;
-            }
             craters.length = 0;
             generateCraters();
 
@@ -1268,6 +1263,12 @@
                 case 'KeyT':
                     noAsteroid = !noAsteroid;
                     break;    
+                case 'Key+':
+                    CRATER_COUNT++;
+                    break;
+                case 'Key-':
+                    CRATER_COUNT--;
+                    break;     
                 case 'KeyP':
                     isPaused = !isPaused;
                     if (isPaused) {
@@ -1301,3 +1302,4 @@
 
 </body>
 </html>
+
