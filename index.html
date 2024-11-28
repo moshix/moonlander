@@ -841,12 +841,12 @@
 
                     }
 
-                    if (velocityX > 0.62) { // contrary thrust if not too close to grnd
+                    if (velocityX > 0.45) { // contrary thrust if not too close to grnd
 
                         accelerationX = -scaledLateralThrust * 1.33;
                     }
 
-                    if (velocityX < -0.62) { // contrary thrust if not too close to grnd
+                    if (velocityX < -0.45) { // contrary thrust if not too close to grnd
                         accelerationX = scaledLateralThrust * 1.33;
                     }
 
