@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.7.8</div>
+        <div>Version..............3.7.9</div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
         <div>Lateral Speed........<span id="lateralSpeed">0</span> m/s</div>
@@ -831,6 +831,12 @@
 
             // try to avoid asteroid!
             avoidAsteroid();
+	    // if the lander is very close to either side edge then set lateral speed to zero 
+            if (landerX < 60 &&  landerX >= canvas.width -60){
+                accelerationX = 0;  
+                velocityX = 0;
+             }
+		
             if (!asteroidCollisionAlarm) {
                 if (Math.abs(lateralDistance) > 1) {
                     scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
@@ -869,11 +875,7 @@
                     isThrustRight = false;
                 }
 
-	       // if the lander is very close to either side edge then set lateral speed to zero 
-               if (landerX < 50 && landerWidth >= canvas.width -50){
-                accelerationX = 0;  
-                velocityX = 0;
-               }
+
                
                 terrainAvoidance(lateralDistance); // check for close terrain
 
