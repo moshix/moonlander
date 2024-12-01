@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.8.3</div>
+        <div>Version..............3.8.4</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -667,8 +667,8 @@
             if (isMuted) {
                 ctx.fillStyle = "white"; 
                 ctx.textAlign = "right";
-                ctx.fillText("Muted", canvas.width -47, 80);
-                ctx.font = "19px Arial"; 
+                ctx.font = "21px Arial"; 
+                ctx.fillText("Muted", canvas.width -85, 80);
              }
 
             if (isCrashed) {
@@ -1184,8 +1184,9 @@
 
             if (isPaused) {
                 ctx.fillStyle = 'white';
-                ctx.font = '24px monospace';
-                ctx.fillText('Paused', canvas.width / 2 - 50, canvas.height / 2);
+                ctx.font = '26px monospace';
+                ctx.textAlign = "center";
+                ctx.fillText('Paused', canvas.width / 2, canvas.height / 2);
                 cancelAnimationFrame(animationID4);
                 animationID4 = requestAnimationFrame(gameLoop); // Continue the loop but skip updates
                 return;
