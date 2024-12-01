@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.8.2</div>
+        <div>Version..............3.8.3</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -41,25 +41,29 @@
         <div>Acceleration.........<span id="acceleration">0</span> m/s²</div>
         <div>Fuel remaining...... <span id="fuel">500</span> kg</div>
         <div>Fuel Consumption.....<span id="consumption">0</span> kg/s</div>
+        <div>Asteroid speed.......<span id="asteroidSpeed">0</span>m/s</div>
         <div>Collision avoidance..<span id="sideMsg"> </span></div>
     </div>
     <div id="legend">
-        <div>cursor keys..Impulse steering </div>
+        <div>cursor keys..Up/sideways steering</div>
         <div>A:...........Autopilot</div>
         <div>P............Pause/Unpause</div>
         <div>R............Restart</div>
         <div>M............Mute/Unmute</div>
         <div>T............Asteroid toggle</div>
+        <div>F............Faster asteroid</div>
+        <div>S............Slower asteroid</div>
         <div>+ -..........Nr of craters</div>
-        <div>____________________________ </div>
+        <div>________________________________ </div>
         <div>(c) by hotdog studios</div>
     </div>
     <script>
 
         // Copyright by hot dog studios
         // All rights reserved
-        // Moon Lander
-        //     a moon lander game with physics as realistics as possible, taken from Apollo 11
+        // Moonlander
+        //     a moon landing game with physics as realistic as possible
+        //
         // Development history
         // v 0.1 game logic and animation (time based)
         // v 0.2 load assets and sounds
@@ -105,7 +109,7 @@
         // v 3.5.0 the return of the asteroid
         // v 3.6.0 in autoland, the lander AGC will predict the asteroid trajectory and try to avoid it
         // v 3.7.0 don't get too close to ground before being over target area in autoland
-        // v 3.8.0 Let users add or reduce amount of craters
+        // v 3.8.0 Let users add or reduce amount of craters, asteroid speed ctrl, some bug fixes
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -165,7 +169,6 @@
 
         const happyImg = new Image();
         happyImg.src = 'happy.png';
-
         // end of images loading
 
         // Sounds loading
@@ -173,7 +176,6 @@
         const crashSound = new Audio('crash.mp3');
         const landedSound = new Audio('eaglelanded.mp3')
        
-
         crashSound.loop = false;
         let isMuted = false;
         let crashPlayed = false;
@@ -198,14 +200,13 @@
         let keyTimeout; // for time of keyPressedLongTime
         keyPressedLongtime2 = true; // this control entering entertainment mode
         let keyTimeout2; // for time of keyPressedLongTime
-
         altitude = 500; // lander altitude in human readable form
         let earthsize = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
         showBurger = false; // show burger only once in 1 landings
         showhappy = false; // showhappy in command module if good landing
         forceManual = false; // force manual during autoland
         let alTime = 0 ; // for asteroid time animation
-        const asteroidSpeed = 40; // pixels per second 
+        let asteroidSpeed = 55; // pixels per second 
         let animationID; 
         let animationID2;
         let animationID3;
@@ -218,8 +219,8 @@
         const issOrbitSpeed = 0.00005;
         
         let CRATER_COUNT = 4; // start with 4 craters on the moon surface 
-        const asteroidIntervalMin = 7000; // Minimum time for asteroid appearances
-        const asteroidIntervalMax = 12000; // Maximum time for asteroid appearances
+        const asteroidIntervalMin = 2000; // Minimum time for asteroid appearances
+        const asteroidIntervalMax = 4000; // Maximum time for asteroid appearances
 
         const GRAVITY = 1.62; // Moon gravity in m/s²
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
@@ -274,7 +275,6 @@
             cancelAnimationFrame(animationID2);
             cancelAnimationFrame(animationID3);
             cancelAnimationFrame(animationID4);
-
            }
 
             if (Math.floor(Math.random() * 6) + 1 === 1) showBurger = true; // show burger for this landing
@@ -327,9 +327,8 @@
             }
             cancelAnimationFrame(animationID2);
             animationID2 = requestAnimationFrame(gameLoop);
-
-
         }
+
 
         function drawMcdonald(landerX, landerY, landerWidth, landerHeight) {
            
@@ -361,8 +360,8 @@
         
             // Draw the astronaut SVG at the calculated position
             //ctx.drawImage(astronautImage, astronautX, astronautY, astronautWidth, astronautHeight);
-            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-38, astronautWidth * 3.5, astronautHeight * 7);
-            ctx.drawImage(roverImg, mcdonaldX + 94, astronautY-3 , astronautWidth *2.2, astronautHeight * 2.2);
+            ctx.drawImage(mcdonaldImg, mcdonaldX + 5, astronautY-38, astronautWidth * 3.5, astronautHeight * 8);
+            ctx.drawImage(roverImg, mcdonaldX + 94, astronautY+2 , astronautWidth *2.2, astronautHeight * 2.2);
         }
 
         function drawAstronaut(landerX, landerY, landerWidth, landerHeight) {
@@ -402,10 +401,11 @@
                 topMsg = "Demo mode - any key to return to game mode";
                 demoMode = true;
                 isMuted = true;
-                initializeGame(); // Restart the game after 5 seconds of no key press
-                    
-                }, 21000);
+                initializeGame(); // Restart the game after 5 seconds of no key press                 
+                }, 21500);
         }
+
+
         function drawStatusLine() {
           
             ctx.font = "34px Arial"; // Set font size and type
@@ -511,17 +511,16 @@
           const adeltaTime = (timestamp - alTime) / 1300; // convert to seconds
           alTime = timestamp;
       
-          if (asteroid && !noAsteroid) {
+          if (asteroid && !noAsteroid && !isPaused) {
               ctx.drawImage(asteroidImg, asteroid.x, asteroid.y, asteroid.width*1.3, asteroid.height*1.3);
-      
+              //console.log('Asteroidspeed: ', asteroidSpeed);
               // Move the asteroid based on time elapsed
               asteroid.x += asteroid.speedX * asteroidSpeed * adeltaTime;
               asteroid.y += asteroid.speedY * asteroidSpeed * adeltaTime;
       
-              // Check if the asteroid goes off-screen
+              // Check if the asteroid goes off-screen, then calculate random new asteroid start time
               if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
-                  nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
-                  // Optionally reset asteroid position here
+                  nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;  
               }
       
               // Check for collision with the lander
@@ -624,8 +623,6 @@
     }
     topMsg2 = ""; // no collision trajectory detected
     asteroidCollisionAlarm = false; // out of collision danger
-
- 
 }
 
 
@@ -731,13 +728,6 @@
             }
         }
 
-  //      function drawPlanet1() {
-  //          // Random position for Saturn
-  //          planet1X = Math.random() * (canvas.width - 100);
-  //          planet1Y = Math.random() * (canvas.height / 2);
-//
- //           ctx.drawImage(planet1Img, planet1X, planet1Y, 60, 60);
-  //      }
 
         function randomPlanet1() {
 
@@ -771,8 +761,6 @@
 
         function autoland() {
             autolandActivated = true;
-
-
 
             if (forceManual) {
 
@@ -831,7 +819,7 @@
 
             // try to avoid asteroid!
             avoidAsteroid();
-	    // if the lander is very close to either side edge then set lateral speed to zero 
+	        // if the lander is very close to either side edge then set lateral speed to zero 
             if (landerX < 60 &&  landerX >= canvas.width -60){
                 accelerationX = 0;  
                 velocityX = 0;
@@ -874,11 +862,8 @@
                     isThrustLeft = false;
                     isThrustRight = false;
                 }
-
-
                
                 terrainAvoidance(lateralDistance); // check for close terrain
-
 
                 // Apply Proportional Vertical Thrust**
                 if (landerY < canvas.height - 60 && !avoidTerrain) { // Above ground
@@ -918,7 +903,6 @@
                     }
                 }
             }
-
     }
 
         function terrainAvoidance(lateralDistance) {
@@ -926,7 +910,7 @@
             //console.log ("landerY / canvas.height -200: ", landerY, "/ ",canvas.height-200);
             //console.log("Lateraldistance: ", lateralDistance);
             // v 3.7.0 feature
-            if ((landerY > canvas.height - 210) && (Math.abs(lateralDistance) > 250)) {
+            if ((landerY > canvas.height - 230) && (Math.abs(lateralDistance) > 190)) {
                 sideMsg = "TERRAIN!"
                sideMsgElement.textContent = sideMsg;
 
@@ -1029,7 +1013,7 @@
 
           // draw a crossmark where the lander has decided to land
           function drawLandingCross() {
-              if (bestLandingSpot !== null && !hasLanded) { // Ensure the landing spot is chosen
+              if (bestLandingSpot !== null && !hasLanded && !isCrashed) { // Ensure the landing spot is chosen
                   const crossSize = 20; // Size of the cross
                   const crossX = bestLandingSpot; // The x-position of the landing spot
                   const crossY = canvas.height - 35; // Near the ground level of the moon
@@ -1145,7 +1129,6 @@
                 button.style.padding = "10px 20px";
                 button.style.fontSize = "18px";
 
-
                 // Add event listener to trigger autoland when clicked
                 button.addEventListener("click", () => {
                     CRATER_COUNT--;
@@ -1170,8 +1153,7 @@
                 ctx.fillText(topMsg2,canvas.width /2, 40 )
                 ctx.font = "13px Arial";
                 ctx.fillStyle = "white";
-                ctx.textAlign = 'right';
-             
+                ctx.textAlign = 'right';             
             }
         }
 
@@ -1190,6 +1172,7 @@
             document.getElementById('acceleration').textContent = (Math.abs(accelerationY) + Math.abs(accelerationX)).toFixed(2);
             document.getElementById('fuel').textContent = fuel.toFixed(2);
             document.getElementById('consumption').textContent = isThrusting ? (5).toFixed(2) : (0).toFixed(2); // Fuel consumption during thrust
+            document.getElementById('asteroidSpeed').textContent =asteroidSpeed.toFixed(0);
             document.getElementById('CRATER_COUNT').textContent = CRATER_COUNT.toFixed(0);
 
             sideMsgElement = document.getElementById('sideMsg'); 
@@ -1274,7 +1257,9 @@
 
         window.addEventListener('keydown', (e) => {
             userInteraction = true;
-            resetKeyPressTimer(); // Reset the timer on every key press
+
+            // Reset the timer on every key press, except T, S,F, + and -
+            if (e.code !=  'KeyF' && e.code != 'KeyS' && e.code != 'Minus' && e.code != 'Equal' && e.code != 'KeyT')  resetKeyPressTimer();
             resetKeyPressTimer2(); // reset time for after landing/crashing
             demoMode = false;
             switch (e.code) {
@@ -1335,11 +1320,19 @@
                 case 'Equal':
                     CRATER_COUNT++;
                     if (CRATER_COUNT > 10) CRATER_COUNT = 10; // max 10
-                    break;
+                     break;
                 case 'Minus':
                     CRATER_COUNT--;
                     if (CRATER_COUNT <0) CRATER_COUNT = 0; // no less than zero
-                    break;     
+                    break;   
+                case 'KeyF':
+                    asteroidSpeed = asteroidSpeed * 1.15; // accelerate 15%
+                    if (asteroidSpeed > 120) asteroidSpeed = 120;
+                    break;
+                case 'KeyS':
+                    asteroidSpeed = asteroidSpeed * 0.85; // decelerate by 25%
+                     if (asteroidSpeed <15) asteroidSpeed = 15;
+                    break;  
                 case 'KeyP':
                     isPaused = !isPaused;
                     if (isPaused) {
@@ -1370,7 +1363,5 @@
         initializeGame();
 
     </script>
-
 </body>
 </html>
-
