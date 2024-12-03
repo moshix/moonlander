@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.8.4</div>
+        <div>Version..............3.8.5</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -400,7 +400,7 @@
                 //CRATER_COUNT = 5; // less craters in demo mode for more fun watching
                 topMsg = "Demo mode - any key to return to game mode";
                 demoMode = true;
-                isMuted = true;
+                //isMuted = true;
                 initializeGame(); // Restart the game after 5 seconds of no key press                 
                 }, 21500);
         }
