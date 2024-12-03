@@ -10,6 +10,6 @@ However, given the excellent animation capabilities of Javascript, this game is 
 
 Play it here: (https://moshix.github.io/moonlander/)  
 
-November 2024, Milan  
+ 5 November 2024, Milan  
 
 (c) 2024-2025 by moshix
