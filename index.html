@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.9.1</div>
+        <div>Version..............3.9.2</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -767,7 +767,7 @@
                 ctx.drawImage(crashedImg, landerX, landerY, 40, 40);
             } else {
                 ctx.drawImage(landerImg, landerX, landerY, 75, 75);
-                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY-10, 87, 87); // show base
+                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY-10, 85, 85); // show base
             }
 
             if (isThrustLeft && !isCrashed && !hasLanded) {
