@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.9.0</div>
+        <div>Version..............3.9.1</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -292,7 +292,7 @@
     
                 landerImg.src = 'lander3.png'; // always reset to original lander image
                 let countdownStarted = false;
-                let countdownValue = 10;
+                let countdownValue = 5;
                 let lastCountdownTime = 0;
                 let isTakingOff = false;
                 
@@ -436,6 +436,11 @@
                 //isMuted = true;
                 noAsteroid = false;
                 hasLanded = false;
+                isLanding = false;
+                isTakingOff = false;
+                countdownStarted = false;
+                countdownValue = 5;
+                
                 initializeGame(); // Restart the game after 5 seconds of no key press                 
                 }, 28500);
         }
@@ -482,6 +487,7 @@
                     // Display countdown
                     ctx.fillStyle = "white";
                     ctx.font = "48px Arial";
+                    ctx.fillText("Countdown to Ascent", canvas.width / 2, canvas.height / 2 - 50);
                     ctx.fillText(countdownValue.toString(), canvas.width / 2, canvas.height / 2);
                 } else if (countdownValue === 0 && !isCrashed && !isTakingOff) {
                     takeoff();
@@ -761,7 +767,7 @@
                 ctx.drawImage(crashedImg, landerX, landerY, 40, 40);
             } else {
                 ctx.drawImage(landerImg, landerX, landerY, 75, 75);
-                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY+15, 69, 69); // show base
+                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY, 83, 83); // show base
             }
 
             if (isThrustLeft && !isCrashed && !hasLanded) {
@@ -809,10 +815,13 @@
             const orbitRadius = canvas.width / 3;
             commanderX = canvas.width / 2 + Math.cos(currentTime * commanderOrbitSpeed) * orbitRadius;
             commanderY = 50 + Math.sin(currentTime * commanderOrbitSpeed) * 30;
+            if (!isTakingOff) {
             ctx.drawImage(commanderImg, commanderX, commanderY, 85, 50);
-            if (showhappy) {
-               // ctx.drawImage(happyImg, commanderX+15, commanderY +9, 37,37);
             }
+           // showing astronaut face deprecated 
+           // if (showhappy) {
+           //    // ctx.drawImage(happyImg, commanderX+15, commanderY +9, 37,37);
+           // }
         }
 
 
@@ -1282,7 +1291,7 @@
 
 
 
-        accelerationY = -0.2; velocityY = -0.2;// move up
+        accelerationY = -0.03; velocityY = -0.01;// move up
             if (!isMuted) {
                 rocketSound.play();
             }
