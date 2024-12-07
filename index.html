@@ -767,7 +767,7 @@
                 ctx.drawImage(crashedImg, landerX, landerY, 40, 40);
             } else {
                 ctx.drawImage(landerImg, landerX, landerY, 75, 75);
-                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY+15, 87, 87); // show base
+                if (isTakingOff)  ctx.drawImage(baseImg, baseX, baseY-10, 87, 87); // show base
             }
 
             if (isThrustLeft && !isCrashed && !hasLanded) {
