@@ -454,6 +454,11 @@
             function resetKeyPressTimer2() {
                 clearTimeout(keyTimeout2); // Clear any existing timeout
                 keyTimeout2 = setTimeout(() => {
+                // Don't restart while lander is still in flight
+                if (!hasLanded && !isCrashed) {
+                    resetKeyPressTimer2(); // re-arm and wait longer
+                    return;
+                }
                 //CRATER_COUNT = 5; // less craters in demo mode for more fun watching
                 topMsg = "Demo mode - any key to return to game mode";
                 //isMuted = true;
