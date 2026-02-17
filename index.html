@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.0.0</div>
+        <div>Version..............4.0.1</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -113,6 +113,7 @@
         // v 3.9.0 Ascent module with countdown and rocket sound    
         // v 3.9.2 fix ascent now repeats Jan 2026
         // v 4.0.0 proportial direction and thrust in all phases of landing
+        // v 4.0.1 integral term target acquisition
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -197,6 +198,7 @@
         let countdownValue = 5;
         let lastCountdownTime = 0;
         let isTakingOff = false;
+        let lateralErrorSum = 0; // integral term accumulator for PID lateral controller
         const ascentImg = new Image();
         ascentImg.src = 'ascent.png';
 
@@ -296,6 +298,7 @@
                 countdownValue = 5;
                 lastCountdownTime = 0;
                 isTakingOff = false;
+                lateralErrorSum = 0;
                 
                 hasLanded = false;
                 isLanding = false;
@@ -912,16 +915,22 @@
             }
 
             if (!asteroidCollisionAlarm) {
-                // PD (Proportional-Derivative) lateral controller
-                const Kp = 0.003;   // proportional gain: steer toward target
-                const Kd = 0.05;    // derivative gain: dampen motion to prevent overshoot
+                // PID (Proportional-Integral-Derivative) lateral controller
+                const Kp = 0.003;    // proportional gain: steer toward target
+                const Kd = 0.05;     // derivative gain: dampen motion to prevent overshoot
+                const Ki = 0.00002;  // integral gain: eliminate steady-state offset
 
                 // Scale limits with altitude — less aggressive near the ground
                 const altFrac = 1 - (landerY / (canvas.height - 60)); // 1 at top, 0 at ground
                 const maxLateralThrust = 0.03 + 0.12 * altFrac;       // 0.03 near ground, 0.15 at top
                 const maxLateralSpeed  = 0.1  + 0.4  * altFrac;       // 0.1 near ground, 0.5 at top
 
-                let desiredAccelX = Kp * lateralDistance - Kd * velocityX;
+                // Accumulate lateral error over time for integral term
+                lateralErrorSum += lateralDistance;
+                // Anti-windup: clamp integral to prevent runaway accumulation
+                lateralErrorSum = Math.max(-5000, Math.min(5000, lateralErrorSum));
+
+                let desiredAccelX = Kp * lateralDistance + Ki * lateralErrorSum - Kd * velocityX;
 
                 // Clamp to altitude-scaled maximum thrust
                 desiredAccelX = Math.max(-maxLateralThrust, Math.min(maxLateralThrust, desiredAccelX));
@@ -931,9 +940,10 @@
                     desiredAccelX = -Math.sign(velocityX) * maxLateralThrust;
                 }
 
-                // Dead zone: stop thrusting when close enough and slow enough
-                if (Math.abs(lateralDistance) < 3 && Math.abs(velocityX) < 0.05) {
+                // Dead zone: stop thrusting when very close and nearly stopped
+                if (Math.abs(lateralDistance) < 2 && Math.abs(velocityX) < 0.03) {
                     desiredAccelX = 0;
+                    lateralErrorSum = 0; // reset integral when on target
                 }
 
                 accelerationX = desiredAccelX;
