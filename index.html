@@ -638,9 +638,19 @@
               asteroid.x += asteroid.speedX * asteroidSpeed * adeltaTime;
               asteroid.y += asteroid.speedY * asteroidSpeed * adeltaTime;
       
-              // Check if the asteroid goes off-screen, then calculate random new asteroid start time
+              // Check if the asteroid goes off-screen, spawn a new one if lander is high enough
               if (asteroid.x < -asteroid.width || asteroid.x > canvas.width || asteroid.y > canvas.height) {
-                  nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;  
+                  nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
+                  if (!hasLanded && !isCrashed && landerY < GROUND_Y - 360) {
+                      asteroid = null;
+                      setTimeout(() => {
+                          if (!hasLanded && !isCrashed && landerY < GROUND_Y - 360) {
+                              createAsteroid();
+                          }
+                      }, nextAsteroidInterval);
+                  } else {
+                      asteroid = null;
+                  }
               }
       
               // Check for collision with the lander
