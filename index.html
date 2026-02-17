@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.1.0</div>
+        <div>Version..............4.1.1</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -117,6 +117,8 @@
         // v 4.0.2 use center of lander for targetting, not left edge!
         // v 4.0.3 when hits meteorite pieces crash to ground and restart
         // v 4.1.0 realistic craters and moon surface
+        // v 4.1.1 adapt to very wide browsers and relaunch meteorite if stil in flight
+
 
         const canvas = document.getElementById('gameCanvas');
         
