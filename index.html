@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.9.2</div>
+        <div>Version..............3.9.3</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -111,7 +111,7 @@
         // v 3.7.0 don't get too close to ground before being over target area in autoland
         // v 3.8.0 Let users add or reduce amount of craters, asteroid speed ctrl, some bug fixes
         // v 3.9.0 Ascent module with countdown and rocket sound    
-
+        // v 3.9.2 fix ascent now repeats Jan 2026
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -291,10 +291,10 @@
             // ... rest of initialization ...
     
                 landerImg.src = 'lander3.png'; // always reset to original lander image
-                let countdownStarted = false;
-                let countdownValue = 5;
-                let lastCountdownTime = 0;
-                let isTakingOff = false;
+                countdownStarted = false;
+                countdownValue = 5;
+                lastCountdownTime = 0;
+                isTakingOff = false;
                 
                 hasLanded = false;
                 isLanding = false;
