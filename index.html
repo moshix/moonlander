@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.0.2</div>
+        <div>Version..............4.0.3</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -115,6 +115,7 @@
         // v 4.0.0 proportial direction and thrust in all phases of landing
         // v 4.0.1 integral term target acquisition
         // v 4.0.2 use center of lander for targetting, not left edge!
+        // v 4.0.3 when hits meteorite pieces crash to ground and restart
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -630,6 +631,13 @@
                   !hasLanded
               ) {
                   isCrashed = true;
+                  isThrusting = false;
+                  isThrustLeft = false;
+                  isThrustRight = false;
+                  bestLandingSpot = false;
+                  if (!isMuted) { crashSound.volume = 0.2; crashSound.play(); }
+                  // Restart game after 5 seconds
+                  setTimeout(() => { initializeGame(); }, 5000);
               }
           }
         // Request the next animation frame, passing the current timestamp
@@ -711,7 +719,7 @@
                     sideMsg = " ";
                     sideMsgElement.textContent = sideMsg; 
                 }, 800);                
-                accelerationY = -GRAVITY - 0.3; // counteract gravity + gentle upward push
+                accelerationY = -GRAVITY - 0.4; // counteract gravity + moderate upward push
             }
             
             return; // Exit once corrective action is applied
@@ -1390,6 +1398,21 @@
 
                 if (landerX < 0) landerX = 0;
                 if (landerX > canvas.width - 50) landerX = canvas.width - 50;
+            }
+
+            // Let crashed debris fall to the ground under gravity
+            if (isCrashed && !hasLanded) {
+                accelerationY = GRAVITY;
+                accelerationX = 0;
+                velocityY += accelerationY * deltaTime;
+                landerY += velocityY * deltaTime * 100;
+
+                // Stop when debris hits the ground
+                if (landerY >= canvas.height - 50) {
+                    landerY = canvas.height - 50;
+                    velocityY = 0;
+                    hasLanded = true;
+                }
             }
 
 
