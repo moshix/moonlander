@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............3.9.3</div>
+        <div>Version..............4.0.0</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -112,6 +112,7 @@
         // v 3.8.0 Let users add or reduce amount of craters, asteroid speed ctrl, some bug fixes
         // v 3.9.0 Ascent module with countdown and rocket sound    
         // v 3.9.2 fix ascent now repeats Jan 2026
+        // v 4.0.0 proportial direction and thrust in all phases of landing
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -700,14 +701,13 @@
                 isThrusting = true;
                 accelerationY = 0.04; velocityY = 0.6;
             } else {
-                // Asteroid predicted to be below, move lander upward
-                velocityY = -0.1; // softly slow down before going up (minus means upwards)
+                // Asteroid predicted to be below, move lander upward smoothly
                 sideMsg = "ASTEROID"; isThrusting = true;
                 setTimeout(() => {
                     sideMsg = " ";
                     sideMsgElement.textContent = sideMsg; 
                 }, 800);                
-                accelerationY = -0.9; velocityY = -0.3;// move up
+                accelerationY = -GRAVITY - 0.3; // counteract gravity + gentle upward push
             }
             
             return; // Exit once corrective action is applied
@@ -899,89 +899,81 @@
             if (altitude < 270) landingMode = "Autoland P65";
 
 
-            // Adjust lateral thrust smoothly toward best landing spot
+            // Lateral distance to best landing spot
             const lateralDistance = bestLandingSpot - landerX;
-            let maxLateralThrust = 0.20; // Cap the lateral thrust
-            let heightFraction = landerY / (canvas.height - 50); // landerY as a fraction of canvas
-            const inverseHeightFactor = 1 - heightFraction; // Inverse fraction: smaller as lander approaches ground
-
-            // Cap lateral speed to x m/sec
-            const maxLateralSpeed = 0.35; // Maximum allowed lateral speed
-
-
-
-            // this applies less thrust as the lander gets closer to the moon surface
-            let scaledLateralThrust = Math.min(maxLateralThrust, (lateralDistance + 3) / (canvas.width * inverseHeightFactor + 1)); // Avoid division by zero
 
             // try to avoid asteroid!
             avoidAsteroid();
-	        // if the lander is very close to either side edge then set lateral speed to zero 
-            if (landerX < 60 &&  landerX >= canvas.width -60){
-                accelerationX = 0;  
+
+            // if the lander is very close to either side edge then set lateral speed to zero
+            if (landerX < 60 || landerX >= canvas.width - 60) {
+                accelerationX = 0;
                 velocityX = 0;
-             }
-		
+            }
+
             if (!asteroidCollisionAlarm) {
-                if (Math.abs(lateralDistance) > 1) {
-                    scaledLateralThrust = scaledLateralThrust * Math.sign(lateralDistance);
-                    if (Math.abs(velocityX) < maxLateralSpeed) {
-                        accelerationX = scaledLateralThrust * Math.sign(lateralDistance);
-                    } else {
-                        accelerationX = (scaledLateralThrust * Math.sign(lateralDistance)) / 3; // cut down thurst by 2/3
+                // PD (Proportional-Derivative) lateral controller
+                const Kp = 0.003;   // proportional gain: steer toward target
+                const Kd = 0.05;    // derivative gain: dampen motion to prevent overshoot
 
-                    }
+                // Scale limits with altitude — less aggressive near the ground
+                const altFrac = 1 - (landerY / (canvas.height - 60)); // 1 at top, 0 at ground
+                const maxLateralThrust = 0.03 + 0.12 * altFrac;       // 0.03 near ground, 0.15 at top
+                const maxLateralSpeed  = 0.1  + 0.4  * altFrac;       // 0.1 near ground, 0.5 at top
 
-                    if (velocityX > 0.45) { // contrary thrust if not too close to grnd
+                let desiredAccelX = Kp * lateralDistance - Kd * velocityX;
 
-                        accelerationX = -scaledLateralThrust * 1.33;
-                    }
+                // Clamp to altitude-scaled maximum thrust
+                desiredAccelX = Math.max(-maxLateralThrust, Math.min(maxLateralThrust, desiredAccelX));
 
-                    if (velocityX < -0.45) { // contrary thrust if not too close to grnd
-                        accelerationX = scaledLateralThrust * 1.33;
-                    }
+                // If lateral speed exceeds altitude-appropriate limit, override to brake
+                if (Math.abs(velocityX) > maxLateralSpeed) {
+                    desiredAccelX = -Math.sign(velocityX) * maxLateralThrust;
+                }
 
+                // Dead zone: stop thrusting when close enough and slow enough
+                if (Math.abs(lateralDistance) < 3 && Math.abs(velocityX) < 0.05) {
+                    desiredAccelX = 0;
+                }
 
-                    // Set thrust direction based on acceleration
-                    if (accelerationX < 0) {
-                        isThrustLeft = false;;
-                        isThrustRight = true;;
-                    } else if (accelerationX > 0) {
-                        isThrustLeft = true;
-                        isThrustRight = false;;
-                    } else {
-                        isThrustLeft = false;
-                        isThrustRight = false;
-                    }
+                accelerationX = desiredAccelX;
 
+                // Set thrust direction visuals based on acceleration
+                if (accelerationX < 0) {
+                    isThrustLeft = false;
+                    isThrustRight = true;
+                } else if (accelerationX > 0) {
+                    isThrustLeft = true;
+                    isThrustRight = false;
                 } else {
-                    accelerationX = 0; // Stop lateral movement when close enough
                     isThrustLeft = false;
                     isThrustRight = false;
                 }
-               
+
                 terrainAvoidance(lateralDistance); // check for close terrain
 
-                // Apply Proportional Vertical Thrust**
+                // Altitude-dependent proportional vertical controller
                 if (landerY < canvas.height - 60 && !avoidTerrain) { // Above ground
-                    if (velocityY > 0.37) { // Only apply thrust if the lander is descending (velocityY > 0)
-                        // Apply upward thrust if descending too fast
-                        if (velocityY > 0.8) {
-                            accelerationY = -1.1 * GRAVITY; // Strong upward thrust to slow descent
-                            isThrusting = true;
-                        } else if (velocityY < 0.5) {
-                            accelerationY = -0.5 * GRAVITY;
-                            isThrusting = true;
-                        } else if (velocityY < 0.2) {
-                            // Minimal thrust for a gentle landing
-                            accelerationY = -0.1 * GRAVITY;
-                            isThrusting = true;
-                        } else {
-                            accelerationY = -0.00 * GRAVITY; // Let gravity pull the lander down gently
-                            isThrusting = false;
-                        }
+                    // Target descent speed: faster when high, very slow near ground
+                    const altitudeFraction = 1 - (landerY / (canvas.height - 60)); // 1 at top, 0 at ground
+                    let targetDescentRate = 0.2 + altitudeFraction * 1.0; // 0.2 near ground, 1.2 at top
+
+                    // Slow descent when far from landing spot to give lateral controller time
+                    const lateralUrgency = Math.abs(lateralDistance) / (canvas.width * 0.3); // 0 when close, >1 when very far
+                    targetDescentRate = targetDescentRate * Math.max(0.1, 1 - lateralUrgency);
+
+                    // Proportional control on vertical speed
+                    const velocityError = velocityY - targetDescentRate;
+                    const Kv = 1.5; // vertical gain
+
+                    if (velocityError > 0) {
+                        // Descending too fast — thrust upward proportionally
+                        let thrustFactor = Math.min(1.2, Kv * velocityError);
+                        accelerationY = -thrustFactor * GRAVITY;
+                        isThrusting = true;
                     } else {
-                        // No upward thrust if the lander is already moving upwards (velocityY <= 0)
-                        accelerationY = 0 * GRAVITY; // Only gravity is applied to pull it down
+                        // At or below target speed — let gravity do the work
+                        accelerationY = 0;
                         isThrusting = false;
                     }
                 } else {
@@ -998,6 +990,11 @@
                         checkLanding(true); // Check if landing is successful
                     }
                 }
+            } else {
+                // Asteroid alarm active — hover at current altitude
+                accelerationY = -GRAVITY;          // exactly cancel gravity
+                velocityY = velocityY * 0.85;      // smoothly damp vertical motion toward zero
+                isThrusting = true;
             }
     }
 
