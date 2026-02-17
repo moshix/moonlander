@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.1.1</div>
+        <div>Version..............4.1.2</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -1054,7 +1054,7 @@
                     }
                 } else {
 
-                    if (landerY >= GROUND_Y - 69) { // On the ground
+                    if (landerY >= GROUND_Y - 58) { // On the ground
                         accelerationY = 0;
                         oldVelocityX = velocityX;
                         accelerationX = 0;
