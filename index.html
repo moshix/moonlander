@@ -185,6 +185,13 @@
 
         const moonSurfaceImg = new Image();
         moonSurfaceImg.src = 'moon_surface.png';
+        let moonSurfaceTileStep = 0;
+        moonSurfaceImg.onload = function() {
+            const tileWidth = SURFACE_HEIGHT * (moonSurfaceImg.naturalWidth / moonSurfaceImg.naturalHeight);
+            moonSurfaceTileStep = tileWidth - 15;
+            craters.length = 0;
+            generateCraters();
+        };
 
         // end of images loading
 
@@ -743,11 +750,8 @@
         function generateCraters() {
             // Calculate tile seam positions to place craters over them
             const seamPositions = [];
-            if (moonSurfaceImg.naturalWidth && moonSurfaceImg.naturalHeight) {
-                const tileWidth = SURFACE_HEIGHT * (moonSurfaceImg.naturalWidth / moonSurfaceImg.naturalHeight);
-                const overlap = 15;
-                const step = tileWidth - overlap;
-                for (let sx = step; sx < canvas.width; sx += step) {
+            if (moonSurfaceTileStep > 0) {
+                for (let sx = moonSurfaceTileStep; sx < canvas.width; sx += moonSurfaceTileStep) {
                     seamPositions.push(sx);
                 }
             }
@@ -781,11 +785,9 @@
 
         function drawMoonSurface() {
             const surfaceY = canvas.height - SURFACE_HEIGHT;
-            if (moonSurfaceImg.naturalWidth && moonSurfaceImg.naturalHeight) {
-                const tileWidth = SURFACE_HEIGHT * (moonSurfaceImg.naturalWidth / moonSurfaceImg.naturalHeight);
-                const overlap = 15;
-                const step = tileWidth - overlap;
-                for (let x = 0; x < canvas.width; x += step) {
+            if (moonSurfaceTileStep > 0) {
+                const tileWidth = moonSurfaceTileStep + 15;
+                for (let x = 0; x < canvas.width; x += moonSurfaceTileStep) {
                     ctx.drawImage(moonSurfaceImg, x, surfaceY, tileWidth, SURFACE_HEIGHT);
                 }
             }
