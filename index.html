@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.0.1</div>
+        <div>Version..............4.0.2</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -114,6 +114,7 @@
         // v 3.9.2 fix ascent now repeats Jan 2026
         // v 4.0.0 proportial direction and thrust in all phases of landing
         // v 4.0.1 integral term target acquisition
+        // v 4.0.2 use center of lander for targetting, not left edge!
 
         const canvas = document.getElementById('gameCanvas');
         
@@ -902,8 +903,8 @@
             if (altitude < 270) landingMode = "Autoland P65";
 
 
-            // Lateral distance to best landing spot
-            const lateralDistance = bestLandingSpot - landerX;
+            // Lateral distance to best landing spot (center of lander to center of target)
+            const lateralDistance = bestLandingSpot - (landerX + landerWidth / 2);
 
             // try to avoid asteroid!
             avoidAsteroid();
