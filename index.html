@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.1.3</div>
+        <div>Version..............4.1.4</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -118,6 +118,7 @@
         // v 4.0.3 when hits meteorite pieces crash to ground and restart
         // v 4.1.0 realistic craters and moon surface
         // v 4.1.1 adapt to very wide browsers and relaunch meteorite if stil in flight
+        // v 4.1.4 more aggressive steering towards landing site at high alt
 
 
         const canvas = document.getElementById('gameCanvas');
@@ -973,8 +974,9 @@
             if (altitude < 270) landingMode = "Autoland P65";
 
 
-            // Lateral distance to best landing spot (center of lander to center of target)
-            const lateralDistance = bestLandingSpot - (landerX + landerWidth / 2);
+            // Lateral distance to best landing spot (visual center of lander to center of target)
+            const landerDrawWidth = 75; // actual drawn width of lander image
+            const lateralDistance = bestLandingSpot - (landerX + landerDrawWidth / 2);
 
             // try to avoid asteroid!
             avoidAsteroid();
@@ -993,8 +995,8 @@
 
                 // Scale limits with altitude — less aggressive near the ground
                 const altFrac = 1 - (landerY / (GROUND_Y - 60)); // 1 at top, 0 at ground
-                const maxLateralThrust = 0.03 + 0.12 * altFrac;       // 0.03 near ground, 0.15 at top
-                const maxLateralSpeed  = 0.1  + 0.4  * altFrac;       // 0.1 near ground, 0.5 at top
+                const maxLateralThrust = 0.05 + 0.25 * altFrac;       // 0.05 near ground, 0.30 at top
+                const maxLateralSpeed  = 0.15 + 0.85 * altFrac;       // 0.15 near ground, 1.0 at top
 
                 // Accumulate lateral error over time for integral term
                 lateralErrorSum += lateralDistance;
