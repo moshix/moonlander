@@ -33,7 +33,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="metrics">
-        <div>Version..............4.1.4</div>
+        <div>Version..............4.1.5</div>
         <div>Craters..............<span id="CRATER_COUNT">4</span></div>
         <div>Altitude.............<span id="altitude">0</span> m</div>
         <div>Vertical Speed.......<span id="verticalSpeed">0</span> m/s</div>
@@ -91,8 +91,8 @@
         // v 2.5 asteroid time-based
         // v 2.6 switch to autoland and back to manual with S key
         // v 2.7 randomly play eagle has landed when properly landed
-    	// v 2.8 changed to nicer lander svg, and many small fixes
-    	// v 2.9 dust particles close to surface
+        // v 2.8 changed to nicer lander svg, and many small fixes
+        // v 2.9 dust particles close to surface
         // v 2.9.4 side thrusters
         // v 2.9.5 change moon size randomly to make Restart more obvious
         // v 3.0   Michael Collins is happy when lander lands correctly
@@ -266,7 +266,8 @@
         const GRAVITY = 1.62; // Moon gravity in m/s²
         const APOLLO_THRUST = 45000; // Apollo 11 descent engine thrust in N
         const SIDE_THRUST = 4200; // Apollo lander side thrusters in N
-        const LANDER_MASS = 15103; // Mass of Apollo 11 lander in kg
+        const LANDER_DRY_MASS = 15103 - 528; // Dry mass (total minus initial fuel) in kg
+        function currentMass() { return LANDER_DRY_MASS + fuel; }
         let landerY, landerX, velocityY, velocityX, accelerationY, accelerationX, fuel, isThrusting, isAutolanding, autolandActivated, earthX, earthY;
         let commanderX = 0;
         let commanderY = 50;
@@ -294,15 +295,15 @@
         let asteroidStartTime = 0;
         let nextAsteroidInterval = Math.random() * (asteroidIntervalMax - asteroidIntervalMin) + asteroidIntervalMin;
 
-	 
+     
         window.onload = function() {
-	         if (isMobile()) {
-	            CRATER_COUNT = 2;
+             if (isMobile()) {
+                CRATER_COUNT = 2;
                 //createAutolandButton(); // Show the autoland button
                 createRestartButton();  // restart button
                 createCreatersPlusButton(); // add s on next restart
                 createCreatersMinusButton(); // fewer craters
-	             }
+                 }
           };
 
 
@@ -538,7 +539,7 @@
 //
  //           if (hasLanded && !isCrashed) {
  //               //clearTimeout(keyTimeout2);
-//		        landerY = canvas.height -67; // put lander on surface
+//                landerY = canvas.height -67; // put lander on surface
 //                showhappy = true;
 //                points = fuel - ( (oldVelocityX * 200) + (oldVelocityY * 200));
 //                pointsF = Number(points).toFixed(0); // make integer
@@ -549,8 +550,8 @@
 //                message = "Lateral v = " + oldVelocityXF.toString() + "  -  Vertical v = " + oldVelocityYF.toString()
 //                ctx.textAlign = "center";
 //                ctx.fillText(message, canvas.width /2, 100);
-//				drawAstronaut(landerX, landerY, landerWidth, landerHeight);
-//				drawMcdonald(landerX, landerY, landerWidth, landerHeight);
+//                drawAstronaut(landerX, landerY, landerWidth, landerHeight);
+//                drawMcdonald(landerX, landerY, landerWidth, landerHeight);
 //
 //                // points system
 //                ctx.fillStyle = "orange"; // Green color for successful landing
@@ -577,7 +578,7 @@
 //                if (mcdonaldShown) {
 //                  if (showBurger && !isMobile) ctx.fillText("Taste the new lunar burger now!", canvas.width /2, 280);
 //                  landingMode = 'Landed';
-//		        }
+//                }
 //                mcdonaldShown = false; // reset immediately
 //                
 //
@@ -606,7 +607,7 @@
 //                ctx.textAlign = "center";
 //                ctx.font = "18px Arial"; // for stats smaller font
 //               ctx.fillText("Game restarts into demo mode if no key pressed", canvas.width /2, 220);
-//		        landingMode = '';    
+//                landingMode = '';    
 //            }
 //          
 //       }
@@ -1379,7 +1380,7 @@
 
         function gameLoop(currentTime) {
             if (!userInteraction) {isMuted = true;}
-    		// Calculate the altitude (distance from the bottom of the canvas)
+            // Calculate the altitude (distance from the bottom of the canvas)
             altitude = GROUND_Y - landerY - 55; // Lander height from the ground
             
         
@@ -1419,7 +1420,7 @@
                 initializeGame();
             }
         }
-            if (!hasLanded && !isCrashed) {
+            if (!hasLanded && !isCrashed && !isTakingOff) {
                 if (autolandActivated) {
 
                     autoland();
@@ -1427,8 +1428,12 @@
                 }
                 
                 if (isThrusting && fuel > 0) {
+                    if (!autolandActivated) {
+                        accelerationY = -APOLLO_THRUST / currentMass();
+                        if (isThrustRight) accelerationX = -SIDE_THRUST / currentMass();
+                        else if (isThrustLeft) accelerationX = SIDE_THRUST / currentMass();
+                    }
                     fuel -= 5 * deltaTime;
-                    // drawDust();
                     if (!isMuted) rocketSound.play();
                
                     if (fuel < 0) fuel = 0;
@@ -1494,7 +1499,7 @@
 
             displayMode();
 
-			drawStatusLine();
+            drawStatusLine();
             cancelAnimationFrame(animationID);
             animationID = requestAnimationFrame(gameLoop);
         }
@@ -1514,22 +1519,22 @@
                     if (!hasLanded && !isCrashed) {
                         forceManual = !forceManual;
                         autolandActivated = false;
-                        accelerationX = -SIDE_THRUST / LANDER_MASS;
+                        accelerationX = -SIDE_THRUST / currentMass();
                         isThrustLeft = false;
                         isThrustRight = true;
                         isThrusting = true;
-                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
+                        accelerationY = -APOLLO_THRUST / currentMass();
                     }
                     break;
                 case 'ArrowRight':
                     if (!hasLanded && !isCrashed) {
                         forceManual = !forceManual;
                         autolandActivated = false;
-                        accelerationX = SIDE_THRUST / LANDER_MASS;
+                        accelerationX = SIDE_THRUST / currentMass();
                         isThrustRight = false;
                         isThrustLeft = true;
                         isThrusting = true;
-                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
+                        accelerationY = -APOLLO_THRUST / currentMass();
                     }
                     break;
                 case 'ArrowUp':
@@ -1539,7 +1544,7 @@
                         isThrusting = true;
                         isThrustLeft = false;
                         isThrustRight = false; // if only going up no side thrusters
-                        accelerationY = -APOLLO_THRUST / LANDER_MASS;
+                        accelerationY = -APOLLO_THRUST / currentMass();
                     }
                     break;
                 case 'KeyA':
